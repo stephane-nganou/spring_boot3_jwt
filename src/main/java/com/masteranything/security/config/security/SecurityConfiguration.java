@@ -11,6 +11,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Class responsible for the security configuration of the application
+ */
 @Configuration
 @EnableWebSecurity
 @AllArgsConstructor
@@ -19,6 +22,15 @@ public class SecurityConfiguration {
   private final JwtAuthenticationFilter jwtAuthFilter;
   private final AuthenticationProvider authenticationProvider;
 
+  /**
+   * @author MasterAnything
+   *
+   * Method responsible for configuring the security filter chain.
+   *  Allow some paths to be accessed without authentication and enforce authentication for other paths.
+   * @param httpSecurity HttpSecurity object
+   * @return a configured SecurityFilterChain object
+   * @throws Exception if an error occurs
+   */
   @Bean
   public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
     httpSecurity

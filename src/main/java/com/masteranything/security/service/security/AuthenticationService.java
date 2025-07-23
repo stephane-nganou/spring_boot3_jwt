@@ -14,6 +14,11 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * @author Masteranythin
+ *
+ * This Service handles the authentication process for the resgistration and login of users.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {

@@ -14,6 +14,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * @author MasterAnything
+ *
+ * This class is responsible for handling authentication requests.
+ */
+
 @RestController
 @RequestMapping("api/v1/auth")
 @RequiredArgsConstructor
@@ -22,6 +28,11 @@ public class AuthenticationController {
   private final Logger logger = LoggerFactory.getLogger(AuthenticationController.class);
   private final AuthenticationService authenticationService;
 
+  /**
+   * This endpoint is used to authenticate a user and return a JWT token as AuthenticationResponse
+   * @param authenticationRequest as AuthenticationRequest
+   * @return AuthenticationResponse
+   */
   @PostMapping("/")
   public ResponseEntity<AuthenticationResponse> authenticate(
       @RequestBody @Valid AuthenticationRequest authenticationRequest) {
@@ -30,6 +41,11 @@ public class AuthenticationController {
   }
 
 
+  /**
+   * This endpoint is used to register a new user and return a JWT token as AuthenticationResponse
+   * @param registerRequest as RegisterRequest
+   * @return AuthenticationResponse
+   */
   @PostMapping("/register")
   public ResponseEntity<AuthenticationResponse> register(
       @RequestBody @Valid RegisterRequest registerRequest) {
