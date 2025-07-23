@@ -1,6 +1,11 @@
 spring:
   application:
     name: security
+  security:
+    auth:
+      header: Authorization
+      bearer: 'Bearer '
+      secret-key: '19b5dc3e3439f76664c98f81633850ca56fee65dd9be03f8b5c09cc229f64266'
   datasource:
     url: jdbc:postgresql://localhost:5432/jwt_security
     username: postgres
