@@ -1,7 +1,5 @@
 package com.masteranything.security.config.shared;
 
-import com.masteranything.security.exception.AuthenticationException;
-import com.masteranything.security.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -22,18 +20,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @RequiredArgsConstructor
 public class AppConfig {
 
-  private final UserRepository userRepository;
+  private final UserDetailsService userDetailsService;
 
-  @Bean
-  public UserDetailsService userDetailsService() {
-    return username -> userRepository.findUserByEmail(username)
-        .orElseThrow(() -> new AuthenticationException("User not found"));
-  }
 
   @Bean
   public AuthenticationProvider authenticationProvider() {
     DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider(
-        userDetailsService());
+        userDetailsService);
 
     authenticationProvider.setPasswordEncoder(passwordEncoder());
 

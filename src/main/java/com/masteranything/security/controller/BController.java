@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RestController;
  * This class is responsible for handling requests to the /api/v1/secure endpoint.
  */
 @RestController
-@RequestMapping("/api/v1/secure")
+@RequestMapping("secure")
 public class BController {
 
   /**

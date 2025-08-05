@@ -11,12 +11,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 /**
  * @author MasterAnything
- *
+ * <p>
  * This service is responsible for generating and validating JWT tokens.
  */
 @Service
@@ -24,6 +25,9 @@ public class JwtService {
 
   @Value("${spring.security.auth.secret-key}")
   private String SECRET_KEY;
+
+  @Value("${spring.security.auth.expiration}")
+  private long EXPIRATION;
 
   public String retrieveUsername(String token) {
     return getClaims(token, Claims::getSubject);
@@ -40,12 +44,18 @@ public class JwtService {
   }
 
   public String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+
+    var authorities = userDetails.getAuthorities()
+        .stream()
+        .map(GrantedAuthority::getAuthority)
+        .toList();
     return Jwts
         .builder()
         .setClaims(extraClaims)
         .setSubject(userDetails.getUsername())
         .setIssuedAt(new Date(System.currentTimeMillis()))
-        .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 60))
+        .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION))
+        .claim("authorities", authorities)
         .signWith(getSignInKey(), SignatureAlgorithm.HS256)
         .compact();
   }
@@ -60,7 +70,8 @@ public class JwtService {
   }
 
   private Date getExpirationDate(String token) {
-    return getAllClaims(token).getExpiration();
+    //return getAllClaims(token).getExpiration();
+    return getClaims(token, Claims::getExpiration);
   }
 
   private Claims getAllClaims(String token) {
