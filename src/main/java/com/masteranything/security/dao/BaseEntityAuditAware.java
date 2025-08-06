@@ -18,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @SuperBuilder
 @MappedSuperclass
-public class BaseEntityExtended extends BaseEntity {
+public class BaseEntityAuditAware extends BaseEntity {
 
     @CreatedBy
     @Column(nullable=false, updatable=false)

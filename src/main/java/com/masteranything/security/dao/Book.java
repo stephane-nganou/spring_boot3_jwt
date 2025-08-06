@@ -19,7 +19,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Book extends BaseEntityExtended {
+public class Book extends BaseEntityAuditAware {
 
     private String title;
     private String authorName;

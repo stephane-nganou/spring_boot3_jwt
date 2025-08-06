@@ -15,7 +15,7 @@ import lombok.experimental.SuperBuilder;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
-public class Feedback extends BaseEntityExtended{
+public class Feedback extends BaseEntityAuditAware{
 
     private Double note;
     private String comment;
