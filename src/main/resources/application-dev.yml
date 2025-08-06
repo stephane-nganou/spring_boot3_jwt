@@ -20,7 +20,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update #create-drop
     show-sql: true
     properties:
       hibernate:
@@ -47,5 +47,5 @@ spring:
       activation-url: '${frontend-host}/activate-account'
     subject:
       activation: 'Account activation'
-  server:
-    port: 8088
+server:
+  port: 8088
