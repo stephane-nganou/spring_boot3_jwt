@@ -7,6 +7,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.Transient;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -38,4 +39,18 @@ public class Book extends BaseEntityAuditAware {
 
     @OneToMany(mappedBy="book")
     private List<BookTransactionHistory> transactionHistories;
+
+    @Transient
+    public double getRate(){
+        if(null == feedbacks || feedbacks.isEmpty()){
+            return 0d;
+        }
+
+        var rate = this.feedbacks.stream()
+            .mapToDouble(Feedback::getNote)
+            .average()
+            .orElse(0d);
+
+        return Math.round(rate * 10d) / 10d;
+    }
 }

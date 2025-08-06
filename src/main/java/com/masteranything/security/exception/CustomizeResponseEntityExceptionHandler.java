@@ -83,6 +83,17 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
     return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN);
   }
 
+  @ExceptionHandler(GeneralException.class)
+  public final ResponseEntity<ErrorDetails> handleGeneralException(GeneralException ex,
+      WebRequest request) {
+    logger.info(ex.getMessage());
+
+    ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(),
+        request.getDescription(false));
+
+    return new ResponseEntity<>(errorDetails, ex.getStatus());
+  }
+
 
   private ResponseEntity<ErrorDetails> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex, 
     WebRequest request) {
