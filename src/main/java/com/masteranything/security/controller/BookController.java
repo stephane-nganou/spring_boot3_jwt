@@ -30,12 +30,16 @@ public class BookController {
     public ResponseEntity<Long> saveBook(
         @Valid @RequestBody BookRequest request, Authentication connectedUser
     ){
-        return new ResponseEntity<>(bookService.save(request, connectedUser), HttpStatus.CREATED);
+        //return new ResponseEntity<>(bookService.save(request, connectedUser), HttpStatus.CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(bookService.save(request, connectedUser));
     }
 
     @GetMapping("{book-id}")
     public ResponseEntity<BookResponse> findBookById(@PathVariable("book-id") Long bookId ){
-        return new ResponseEntity<>(bookService.findById(bookId), HttpStatus.OK);
+        // return new ResponseEntity<>(bookService.findById(bookId), HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(bookService.findById(bookId));
     }
 
     @GetMapping
@@ -44,7 +48,9 @@ public class BookController {
         @RequestParam(name = "size", defaultValue="10", required=false) int size,
         Authentication connectedUser
     ){
-        return new ResponseEntity<>(bookService.findAllBooks(page, size, connectedUser), HttpStatus.OK);
+        // return new ResponseEntity<>(bookService.findAllBooks(page, size, connectedUser), HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(bookService.findAllBooks(page, size, connectedUser));
     }
 
     @GetMapping
@@ -53,6 +59,9 @@ public class BookController {
         @RequestParam(name = "size", defaultValue="10", required=false) int size,
         Authentication connectedUser
     ){
-        return new ResponseEntity<>(bookService.findAllBooksByOwner(page, size, connectedUser), HttpStatus.OK);
+        //return new ResponseEntity<>(bookService.findAllBooksByOwner(page, size, connectedUser), HttpStatus.OK);
+
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(bookService.findAllBooksByOwner(page, size, connectedUser));
     }
 }
