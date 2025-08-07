@@ -1,14 +1,21 @@
 package com.masteranything.security.service;
 
-import org.hibernate.boot.BootLogging;
+import java.util.List;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.masteranything.security.dao.Book;
+import com.masteranything.security.dao.BookSpecification;
 import com.masteranything.security.dao.User;
 import com.masteranything.security.dto.BookRequest;
 import com.masteranything.security.dto.BookResponse;
+import com.masteranything.security.dto.PageResponse;
 import com.masteranything.security.exception.GeneralException;
 import com.masteranything.security.repository.BookRepository;
 
@@ -37,7 +44,48 @@ public class BookService {
         
     }
 
+    public PageResponse<BookResponse> findAllBooks(int page, int size, Authentication connectedUser){
+        
+        var user = (User) connectedUser.getPrincipal();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
+        Page<Book> books = bookRepository.findAllDisplayableBooks(pageable, user.getId());
+        List<BookResponse> bookResponse = books.stream()
+                                                .map(this::toBookResponse)
+                                                .toList();
 
+        return new PageResponse<>(
+            bookResponse,
+            books.getNumber(),
+            books.getSize(),
+            books.getTotalElements(),
+            books.getTotalPages(),
+            books.isFirst(),
+            books.isLast()
+        );
+    }
+
+    public PageResponse<BookResponse> findAllBooksByOwner(int page, int size, Authentication connectedUser){
+        
+        var user = (User) connectedUser.getPrincipal();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
+
+        //Page<Book> books = bookRepository.findAllByOwner(pageable, user.getId());
+        Page<Book> books = bookRepository.findAll(BookSpecification.withOwnerId(user.getId()), pageable);
+
+        List<BookResponse> bookResponse = books.stream()
+                                                .map(this::toBookResponse)
+                                                .toList();
+
+        return new PageResponse<>(
+            bookResponse,
+            books.getNumber(),
+            books.getSize(),
+            books.getTotalElements(),
+            books.getTotalPages(),
+            books.isFirst(),
+            books.isLast()
+        );
+    }
 
 
     private Book toBook(BookRequest request){

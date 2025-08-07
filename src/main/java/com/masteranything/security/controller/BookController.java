@@ -8,10 +8,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.masteranything.security.dto.BookRequest;
 import com.masteranything.security.dto.BookResponse;
+import com.masteranything.security.dto.PageResponse;
 import com.masteranything.security.service.BookService;
 
 import jakarta.validation.Valid;
@@ -34,5 +36,23 @@ public class BookController {
     @GetMapping("{book-id}")
     public ResponseEntity<BookResponse> findBookById(@PathVariable("book-id") Long bookId ){
         return new ResponseEntity<>(bookService.findById(bookId), HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<PageResponse<BookResponse>> getAllBooks(
+        @RequestParam(name = "page", defaultValue="0", required=false) int page,
+        @RequestParam(name = "size", defaultValue="10", required=false) int size,
+        Authentication connectedUser
+    ){
+        return new ResponseEntity<>(bookService.findAllBooks(page, size, connectedUser), HttpStatus.OK);
+    }
+
+    @GetMapping
+    public ResponseEntity<PageResponse<BookResponse>> getAllBooksByOwner(
+        @RequestParam(name = "page", defaultValue="0", required=false) int page,
+        @RequestParam(name = "size", defaultValue="10", required=false) int size,
+        Authentication connectedUser
+    ){
+        return new ResponseEntity<>(bookService.findAllBooksByOwner(page, size, connectedUser), HttpStatus.OK);
     }
 }
