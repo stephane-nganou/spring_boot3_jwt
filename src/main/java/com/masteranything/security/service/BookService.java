@@ -12,12 +12,16 @@ import org.springframework.stereotype.Service;
 
 import com.masteranything.security.dao.Book;
 import com.masteranything.security.dao.BookSpecification;
+import com.masteranything.security.dao.BookTransactionHistory;
 import com.masteranything.security.dao.User;
 import com.masteranything.security.dto.BookRequest;
 import com.masteranything.security.dto.BookResponse;
+import com.masteranything.security.dto.BorrowedBookResponse;
 import com.masteranything.security.dto.PageResponse;
 import com.masteranything.security.exception.GeneralException;
 import com.masteranything.security.repository.BookRepository;
+import com.masteranything.security.repository.BookTransactionHistoryRepository;
+import com.masteranything.security.util.FactoryUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -26,11 +30,12 @@ import lombok.RequiredArgsConstructor;
 public class BookService {
 
     private final BookRepository bookRepository;
+    private final BookTransactionHistoryRepository transactionHistory;
 
     public Long save(BookRequest request, Authentication connectedUser){
         
         var user = (User)connectedUser.getPrincipal();
-        var book = toBook(request);
+        var book = FactoryUtils.convertToBook(request);
         book.setOwner(user);
 
         return bookRepository.save(book).getId();
@@ -39,7 +44,7 @@ public class BookService {
     public BookResponse findById(Long bookId){
 
         return bookRepository.findById(bookId)
-                .map(this::toBookResponse)
+                .map(FactoryUtils::convertToBookResponse)
                 .orElseThrow(() -> new GeneralException("No Book found. Id: " + bookId, HttpStatus.NOT_FOUND));
         
     }
@@ -50,7 +55,7 @@ public class BookService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<Book> books = bookRepository.findAllDisplayableBooks(pageable, user.getId());
         List<BookResponse> bookResponse = books.stream()
-                                                .map(this::toBookResponse)
+                                                .map(FactoryUtils::convertToBookResponse)
                                                 .toList();
 
         return new PageResponse<>(
@@ -73,9 +78,10 @@ public class BookService {
         Page<Book> books = bookRepository.findAll(BookSpecification.withOwnerId(user.getId()), pageable);
 
         List<BookResponse> bookResponse = books.stream()
-                                                .map(this::toBookResponse)
+                                                .map(FactoryUtils::convertToBookResponse)
                                                 .toList();
-
+        
+        
         return new PageResponse<>(
             bookResponse,
             books.getNumber(),
@@ -87,30 +93,28 @@ public class BookService {
         );
     }
 
+    public PageResponse<BorrowedBookResponse> findAllBorrowedBooks(int page, int size, Authentication connectedUser){
+        
+        var user = (User) connectedUser.getPrincipal();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
 
-    private Book toBook(BookRequest request){
+        //Page<Book> books = bookRepository.findAllByOwner(pageable, user.getId());
+        Page<BookTransactionHistory> allBorrowedBooks = transactionHistory.findAllBorrowedBooks(pageable, user.getId());
 
-        return Book.builder()
-            .id(request.id())
-            .title(request.title())
-            .authorName(request.authorName())
-            .synopsis(request.synopsis())
-            .archived(false)
-            .shareable(request.shareable())
-            .build();
+        List<BorrowedBookResponse> borrowedBookResponse = allBorrowedBooks.stream()
+                                                .map(FactoryUtils::convertToBorrowedBookResponse)
+                                                .toList();
+
+        return new PageResponse<>(
+            borrowedBookResponse,
+            allBorrowedBooks.getNumber(),
+            allBorrowedBooks.getSize(),
+            allBorrowedBooks.getTotalElements(),
+            allBorrowedBooks.getTotalPages(),
+            allBorrowedBooks.isFirst(),
+            allBorrowedBooks.isLast()
+        );
     }
 
-    private BookResponse toBookResponse(Book book){
-        return BookResponse.builder()
-            .id(book.getId())
-            .title(book.getTitle())
-            .authourName(book.getAuthorName())
-            .isbn(book.getIsbn())
-            .synopsis(book.getSynopsis())
-            .rate(book.getRate())
-            .archived(book.isArchived())
-            .shareable(book.isShareable())
-            .owner(book.getOwner().getFullName())
-            .build();
-    }
+    
 }

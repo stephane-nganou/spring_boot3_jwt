@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.masteranything.security.dto.BookRequest;
 import com.masteranything.security.dto.BookResponse;
+import com.masteranything.security.dto.BorrowedBookResponse;
 import com.masteranything.security.dto.PageResponse;
 import com.masteranything.security.service.BookService;
 
@@ -25,6 +26,17 @@ import lombok.RequiredArgsConstructor;
 public class BookController {
 
     private final BookService bookService;
+
+    @GetMapping
+    public ResponseEntity<PageResponse<BookResponse>> getAllBooks(
+        @RequestParam(name = "page", defaultValue="0", required=false) int page,
+        @RequestParam(name = "size", defaultValue="10", required=false) int size,
+        Authentication connectedUser
+    ){
+        // return new ResponseEntity<>(bookService.findAllBooks(page, size, connectedUser), HttpStatus.OK);
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(bookService.findAllBooks(page, size, connectedUser));
+    }
 
     @PostMapping
     public ResponseEntity<Long> saveBook(
@@ -42,18 +54,7 @@ public class BookController {
             .body(bookService.findById(bookId));
     }
 
-    @GetMapping
-    public ResponseEntity<PageResponse<BookResponse>> getAllBooks(
-        @RequestParam(name = "page", defaultValue="0", required=false) int page,
-        @RequestParam(name = "size", defaultValue="10", required=false) int size,
-        Authentication connectedUser
-    ){
-        // return new ResponseEntity<>(bookService.findAllBooks(page, size, connectedUser), HttpStatus.OK);
-        return ResponseEntity.status(HttpStatus.OK)
-            .body(bookService.findAllBooks(page, size, connectedUser));
-    }
-
-    @GetMapping
+    @GetMapping("/owner")
     public ResponseEntity<PageResponse<BookResponse>> getAllBooksByOwner(
         @RequestParam(name = "page", defaultValue="0", required=false) int page,
         @RequestParam(name = "size", defaultValue="10", required=false) int size,
@@ -64,4 +65,15 @@ public class BookController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(bookService.findAllBooksByOwner(page, size, connectedUser));
     }
+
+    @GetMapping("/borrowed")
+    public ResponseEntity<PageResponse<BorrowedBookResponse>> getAllBorrowedBooks(
+        @RequestParam(name = "page", defaultValue="0", required=false) int page,
+        @RequestParam(name = "size", defaultValue="10", required=false) int size,
+        Authentication connectedUser
+    ){
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(bookService.findAllBorrowedBooks(page, size, connectedUser));
+    }
+
 }
