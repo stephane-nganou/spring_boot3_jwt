@@ -1,6 +1,7 @@
 package com.masteranything.security.service;
 
 import java.util.List;
+import java.util.function.Predicate;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -107,6 +108,31 @@ public class BookServiceImp implements BookService {
         Page<BookTransactionHistory> allBorrowedBooks = transactionHistory.findAllBorrowedBooks(pageable, user.getId());
 
         List<BorrowedBookResponse> borrowedBookResponse = allBorrowedBooks.stream()
+                                                .map(FactoryUtils::convertToBorrowedBookResponse)
+                                                .toList();
+
+        return new PageResponse<>(
+            borrowedBookResponse,
+            allBorrowedBooks.getNumber(),
+            allBorrowedBooks.getSize(),
+            allBorrowedBooks.getTotalElements(),
+            allBorrowedBooks.getTotalPages(),
+            allBorrowedBooks.isFirst(),
+            allBorrowedBooks.isLast()
+        );
+    }
+
+    @Override
+    public PageResponse<BorrowedBookResponse> findAllReturnedBooks(int page, int size, Authentication connectedUser) {
+        var user = (User) connectedUser.getPrincipal();
+        Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
+
+        
+        Page<BookTransactionHistory> allBorrowedBooks = transactionHistory.findAllBorrowedBooks(pageable, user.getId());
+
+        Predicate<BookTransactionHistory> bookReturnedPredicate = history -> (history.isReturnApproved()) && (history.isReturnApproved());
+        List<BorrowedBookResponse> borrowedBookResponse = allBorrowedBooks.stream()
+                                                .filter(bookReturnedPredicate)
                                                 .map(FactoryUtils::convertToBorrowedBookResponse)
                                                 .toList();
 
