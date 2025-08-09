@@ -22,4 +22,12 @@ public interface BookService {
     PageResponse<BorrowedBookResponse> findAllReturnedBooks(int page, int size, Authentication connectedUser);
 
     Long updateShareableStatus(Long bookId, Authentication connectedUser);
+
+    Long updateArchivedStatus(Long bookId, Authentication connectedUser);
+
+    Long borrowBook(Long bookId, Authentication connectedUser);
+
+    Long returnBorrowBook(Long bookId, Authentication connectedUser);
+
+    Long approveReturnBook(Long bookId, Authentication connectedUser);
 }

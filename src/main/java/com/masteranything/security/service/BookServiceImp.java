@@ -32,7 +32,10 @@ import lombok.RequiredArgsConstructor;
 public class BookServiceImp implements BookService {
 
     private final BookRepository bookRepository;
-    private final BookTransactionHistoryRepository transactionHistory;
+    private final BookTransactionHistoryRepository transactionHistoryRepository;
+
+    private final static String NOT_PERMITTED = "Operation Not Permitted";
+    private final static String BOOK_NOT_FOUND = "No Book found with ID: ";
 
     @Override
     public Long save(BookRequest request, Authentication connectedUser){
@@ -108,7 +111,7 @@ public class BookServiceImp implements BookService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
 
         //Page<Book> books = bookRepository.findAllByOwner(pageable, user.getId());
-        Page<BookTransactionHistory> allBorrowedBooks = transactionHistory.findAllBorrowedBooks(pageable, user.getId());
+        Page<BookTransactionHistory> allBorrowedBooks = transactionHistoryRepository.findAllBorrowedBooks(pageable, user.getId());
 
         List<BorrowedBookResponse> borrowedBookResponse = allBorrowedBooks.stream()
                                                 .map(FactoryUtils::convertToBorrowedBookResponse)
@@ -131,7 +134,7 @@ public class BookServiceImp implements BookService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
 
         
-        Page<BookTransactionHistory> allBorrowedBooks = transactionHistory.findAllBorrowedBooks(pageable, user.getId());
+        Page<BookTransactionHistory> allBorrowedBooks = transactionHistoryRepository.findAllBorrowedBooks(pageable, user.getId());
 
         Predicate<BookTransactionHistory> bookReturnedPredicate = history -> (history.isReturnApproved()) && (history.isReturned());
         List<BorrowedBookResponse> borrowedBookResponse = allBorrowedBooks.stream()
@@ -155,14 +158,14 @@ public class BookServiceImp implements BookService {
 
         var book = bookRepository.findById(bookId)
             .orElseThrow(() -> new GeneralException(
-                "No Book found with ID: " + bookId,
+                BOOK_NOT_FOUND + bookId,
                 HttpStatus.NOT_FOUND
             ));
 
         var user = (User) connectedUser.getPrincipal();
 
         if(!Objects.equals(book.getOwner().getId(), user.getId()))
-            throw new GeneralException("Operation Not Permitted", HttpStatus.FORBIDDEN);
+            throw new GeneralException(NOT_PERMITTED, HttpStatus.FORBIDDEN);
         
         book.setShareable(!book.isShareable());
         bookRepository.save(book);
@@ -170,6 +173,133 @@ public class BookServiceImp implements BookService {
         return book.getId();
 
     }
+
+    @Override
+    public Long updateArchivedStatus(Long bookId, Authentication connectedUser) {
+
+        var book = bookRepository.findById(bookId)
+            .orElseThrow(() -> new GeneralException(
+                BOOK_NOT_FOUND + bookId,
+                HttpStatus.NOT_FOUND
+            ));
+
+        var user = (User) connectedUser.getPrincipal();
+
+        if(!Objects.equals(book.getOwner().getId(), user.getId()))
+            throw new GeneralException(NOT_PERMITTED, HttpStatus.FORBIDDEN);
+        
+        book.setArchived(!book.isArchived());
+        bookRepository.save(book);
+
+        return book.getId();
+
+    }
+
+    @Override
+    public Long borrowBook(Long bookId, Authentication connectedUser) {
+
+        var book = bookRepository.findById(bookId)
+            .orElseThrow(() -> new GeneralException(
+                BOOK_NOT_FOUND + bookId,
+                HttpStatus.NOT_FOUND
+            ));
+
+        
+
+        var user = (User) connectedUser.getPrincipal();
+
+        checkIfBookArchivedOrShareable(book);
+
+        checkIfNotOwnerBook(book, user);
+
+        checkIfAlreadyBorrowed(book, user);  
+        
+        if(transactionHistoryRepository.isAlreadyBorrowedByUser(bookId))
+            throw new GeneralException("Book already Borrowed", HttpStatus.NOT_ACCEPTABLE);
+
+        
+        var bookTransactionHistory = BookTransactionHistory.builder()
+                                        .user(user)
+                                        .book(book)
+                                        .returned(false)
+                                        .returnApproved(false)
+                                        .build();
+
+        return transactionHistoryRepository.save(bookTransactionHistory).getId();
+
+    }
+
+    @Override
+    public Long returnBorrowBook(Long bookId, Authentication connectedUser) {
+
+        var book = bookRepository.findById(bookId)
+            .orElseThrow(() -> new GeneralException(
+                BOOK_NOT_FOUND + bookId,
+                HttpStatus.NOT_FOUND
+            ));
+
+
+        var user = (User) connectedUser.getPrincipal();
+
+        checkIfBookArchivedOrShareable(book);
+
+        checkIfNotOwnerBook(book, user);
+
+        BookTransactionHistory bookTransactionHistory = transactionHistoryRepository
+                                                            .findByBookIdAndUserId(bookId, user.getId())
+                                                            .orElseThrow(() -> new GeneralException("No Transaction found", HttpStatus.NOT_FOUND));
+
+        bookTransactionHistory.setReturned(true);
+
+        return transactionHistoryRepository.save(bookTransactionHistory).getId();
+    }
+
+    @Override
+    public Long approveReturnBook(Long bookId, Authentication connectedUser) {
+
+        var book = bookRepository.findById(bookId)
+            .orElseThrow(() -> new GeneralException(
+                BOOK_NOT_FOUND + bookId,
+                HttpStatus.NOT_FOUND
+            ));
+
+
+        var user = (User) connectedUser.getPrincipal();
+
+        checkIfBookArchivedOrShareable(book);
+
+        checkIfOwnerBook(book, user);
+
+        BookTransactionHistory bookTransactionHistory = transactionHistoryRepository
+                                                            .findByBookIdAndOwnerId(bookId, user.getId())
+                                                            .orElseThrow(() -> new GeneralException("No Transaction found", HttpStatus.NOT_FOUND));
+
+        bookTransactionHistory.setReturnApproved(false);
+
+        return transactionHistoryRepository.save(bookTransactionHistory).getId();
+    }
+
+
+    private void checkIfBookArchivedOrShareable(Book book){
+        if(book.isArchived() || !book.isShareable())
+            throw new GeneralException("Book unavailable", HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    private void checkIfNotOwnerBook(Book book, User user){
+        if(Objects.equals(book.getOwner().getId(), user.getId()))
+            throw new GeneralException("Can not update own book", HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    private void checkIfOwnerBook(Book book, User user){
+        if(!Objects.equals(book.getOwner().getId(), user.getId()))
+            throw new GeneralException("Can not update this book", HttpStatus.FORBIDDEN);
+    }
+
+    private void checkIfAlreadyBorrowed(Book book, User user){
+        if(Objects.equals(book.getOwner().getId(), user.getId()))
+            throw new GeneralException("Can not borrowed book", HttpStatus.NOT_ACCEPTABLE);
+    }
+
 
     
 }

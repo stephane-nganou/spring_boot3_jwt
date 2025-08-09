@@ -94,4 +94,25 @@ public class BookController {
             .body(bookService.updateShareableStatus(bookId, connectedUser));
     }
 
+    @PostMapping("/borrow/{book-id}")
+    public ResponseEntity<Long> borrowBook(@PathVariable Long bookId, Authentication connectedUser){
+        
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(bookService.borrowBook(bookId, connectedUser));
+    }
+
+    @PatchMapping("/borrow/return/{book-id}")
+    public ResponseEntity<Long> returnBorrowBook(@PathVariable Long bookId, Authentication connectedUser){
+        
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(bookService.returnBorrowBook(bookId, connectedUser));
+    }
+
+    @PatchMapping("/borrow/return/approve/{book-id}")
+    public ResponseEntity<Long> approveReturnBorrowBook(@PathVariable Long bookId, Authentication connectedUser){
+        
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(bookService.approveReturnBook(bookId, connectedUser));
+    }
+
 }
