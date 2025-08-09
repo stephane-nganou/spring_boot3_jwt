@@ -3,7 +3,6 @@ package com.masteranything.security.exception;
 import org.springframework.http.HttpStatus;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 
 @Getter
@@ -14,5 +13,10 @@ public class GeneralException extends RuntimeException {
     public GeneralException(String message, HttpStatus status){
         super(message);
         this.status = status;
+    }
+
+    public GeneralException(String message){
+        super(message);
+        this.status = null;
     }
 }

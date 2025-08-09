@@ -1,6 +1,7 @@
 package com.masteranything.security.service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.springframework.data.domain.Page;
@@ -145,6 +146,27 @@ public class BookServiceImp implements BookService {
             allBorrowedBooks.isFirst(),
             allBorrowedBooks.isLast()
         );
+    }
+
+    @Override
+    public Long updateShareableStatus(Long bookId, Authentication connectedUser) {
+
+        var book = bookRepository.findById(bookId)
+            .orElseThrow(() -> new GeneralException(
+                "No Book found with ID: " + bookId,
+                HttpStatus.NOT_FOUND
+            ));
+
+        var user = (User) connectedUser.getPrincipal();
+
+        if(!Objects.equals(book.getOwner().getId(), user.getId()))
+            throw new GeneralException("Operation Not Permitted", HttpStatus.FORBIDDEN);
+        
+        book.setShareable(!book.isShareable());
+        bookRepository.save(book);
+
+        return book.getId();
+
     }
 
     
