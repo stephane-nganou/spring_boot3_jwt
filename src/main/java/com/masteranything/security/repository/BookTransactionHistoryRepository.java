@@ -10,7 +10,7 @@ import com.masteranything.security.dao.BookTransactionHistory;
 public interface BookTransactionHistoryRepository extends JpaRepository<BookTransactionHistory, Long>{
     @Query("""
              SELECT history
-             FROM BookTransactionHistory
+             FROM BookTransactionHistory history
              where history.owner.id = :userId
             """)
     Page<BookTransactionHistory> findAllBorrowedBooks(Pageable pageable, Long userId);
