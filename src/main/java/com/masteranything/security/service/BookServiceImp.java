@@ -59,7 +59,9 @@ public class BookServiceImp implements BookService {
         var user = (User) connectedUser.getPrincipal();
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<Book> books = bookRepository.findAllDisplayableBooks(pageable, user.getId());
+        Predicate<Book> isNotArchivePredicate = book -> !book.isArchived();
         List<BookResponse> bookResponse = books.stream()
+                                                .filter(isNotArchivePredicate)
                                                 .map(FactoryUtils::convertToBookResponse)
                                                 .toList();
 
@@ -131,7 +133,7 @@ public class BookServiceImp implements BookService {
         
         Page<BookTransactionHistory> allBorrowedBooks = transactionHistory.findAllBorrowedBooks(pageable, user.getId());
 
-        Predicate<BookTransactionHistory> bookReturnedPredicate = history -> (history.isReturnApproved()) && (history.isReturnApproved());
+        Predicate<BookTransactionHistory> bookReturnedPredicate = history -> (history.isReturnApproved()) && (history.isReturned());
         List<BorrowedBookResponse> borrowedBookResponse = allBorrowedBooks.stream()
                                                 .filter(bookReturnedPredicate)
                                                 .map(FactoryUtils::convertToBorrowedBookResponse)
