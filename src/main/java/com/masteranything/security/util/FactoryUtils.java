@@ -18,6 +18,7 @@ public class FactoryUtils {
             .rate(book.getRate())
             .archived(book.isArchived())
             .shareable(book.isShareable())
+            .cover(FileUtils.readFileFromLocation(book.getBookCover()))
             .owner(book.getOwner().getFullName())
             .build();
     }
