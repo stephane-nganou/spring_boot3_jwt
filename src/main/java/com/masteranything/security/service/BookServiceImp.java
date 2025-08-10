@@ -24,7 +24,7 @@ import com.masteranything.security.dto.PageResponse;
 import com.masteranything.security.exception.GeneralException;
 import com.masteranything.security.repository.BookRepository;
 import com.masteranything.security.repository.BookTransactionHistoryRepository;
-import com.masteranything.security.util.FactoryUtils;
+import com.masteranything.security.util.BookUtils;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,7 +43,7 @@ public class BookServiceImp implements BookService {
     public Long save(BookRequest request, Authentication connectedUser){
         
         var user = (User)connectedUser.getPrincipal();
-        var book = FactoryUtils.convertToBook(request);
+        var book = BookUtils.convertToBook(request);
         book.setOwner(user);
 
         return bookRepository.save(book).getId();
@@ -53,7 +53,7 @@ public class BookServiceImp implements BookService {
     public BookResponse findById(Long bookId){
 
         return bookRepository.findById(bookId)
-                .map(FactoryUtils::convertToBookResponse)
+                .map(BookUtils::convertToBookResponse)
                 .orElseThrow(() -> new GeneralException("No Book found. Id: " + bookId, HttpStatus.NOT_FOUND));
         
     }
@@ -67,7 +67,7 @@ public class BookServiceImp implements BookService {
         Predicate<Book> isNotArchivePredicate = book -> !book.isArchived();
         List<BookResponse> bookResponse = books.stream()
                                                 .filter(isNotArchivePredicate)
-                                                .map(FactoryUtils::convertToBookResponse)
+                                                .map(BookUtils::convertToBookResponse)
                                                 .toList();
 
         return new PageResponse<>(
@@ -91,7 +91,7 @@ public class BookServiceImp implements BookService {
         Page<Book> books = bookRepository.findAll(BookSpecification.withOwnerId(user.getId()), pageable);
 
         List<BookResponse> bookResponse = books.stream()
-                                                .map(FactoryUtils::convertToBookResponse)
+                                                .map(BookUtils::convertToBookResponse)
                                                 .toList();
         
         
@@ -116,7 +116,7 @@ public class BookServiceImp implements BookService {
         Page<BookTransactionHistory> allBorrowedBooks = transactionHistoryRepository.findAllBorrowedBooks(pageable, user.getId());
 
         List<BorrowedBookResponse> borrowedBookResponse = allBorrowedBooks.stream()
-                                                .map(FactoryUtils::convertToBorrowedBookResponse)
+                                                .map(BookUtils::convertToBorrowedBookResponse)
                                                 .toList();
 
         return new PageResponse<>(
@@ -141,7 +141,7 @@ public class BookServiceImp implements BookService {
         Predicate<BookTransactionHistory> bookReturnedPredicate = history -> (history.isReturnApproved()) && (history.isReturned());
         List<BorrowedBookResponse> borrowedBookResponse = allBorrowedBooks.stream()
                                                 .filter(bookReturnedPredicate)
-                                                .map(FactoryUtils::convertToBorrowedBookResponse)
+                                                .map(BookUtils::convertToBorrowedBookResponse)
                                                 .toList();
 
         return new PageResponse<>(
@@ -210,11 +210,11 @@ public class BookServiceImp implements BookService {
 
         var user = (User) connectedUser.getPrincipal();
 
-        checkIfBookArchivedOrShareable(book);
+        BookUtils.checkIfBookArchivedOrShareable(book);
 
-        checkIfNotOwnerBook(book, user);
+        BookUtils.checkIfNotOwnerBook(book, user);
 
-        checkIfAlreadyBorrowed(book, user);  
+        BookUtils.checkIfAlreadyBorrowed(book, user);  
         
         if(transactionHistoryRepository.isAlreadyBorrowedByUser(bookId))
             throw new GeneralException("Book already Borrowed", HttpStatus.NOT_ACCEPTABLE);
@@ -243,9 +243,9 @@ public class BookServiceImp implements BookService {
 
         var user = (User) connectedUser.getPrincipal();
 
-        checkIfBookArchivedOrShareable(book);
+        BookUtils.checkIfBookArchivedOrShareable(book);
 
-        checkIfNotOwnerBook(book, user);
+        BookUtils.checkIfNotOwnerBook(book, user);
 
         BookTransactionHistory bookTransactionHistory = transactionHistoryRepository
                                                             .findByBookIdAndUserId(bookId, user.getId())
@@ -268,9 +268,9 @@ public class BookServiceImp implements BookService {
 
         var user = (User) connectedUser.getPrincipal();
 
-        checkIfBookArchivedOrShareable(book);
+        BookUtils.checkIfBookArchivedOrShareable(book);
 
-        checkIfOwnerBook(book, user);
+        BookUtils.checkIfOwnerBook(book, user);
 
         BookTransactionHistory bookTransactionHistory = transactionHistoryRepository
                                                             .findByBookIdAndOwnerId(bookId, user.getId())
@@ -293,34 +293,12 @@ public class BookServiceImp implements BookService {
 
         var user = (User) connectedUser.getPrincipal();
 
-        checkIfOwnerBook(book, user);
+        BookUtils.checkIfOwnerBook(book, user);
 
         var bookCover = fileStorageService.saveFile(file, bookId);
         book.setBookCover(bookCover);
         bookRepository.save(book);
     }
-
-
-    private void checkIfBookArchivedOrShareable(Book book){
-        if(book.isArchived() || !book.isShareable())
-            throw new GeneralException("Book unavailable", HttpStatus.NOT_ACCEPTABLE);
-    }
-
-    private void checkIfNotOwnerBook(Book book, User user){
-        if(Objects.equals(book.getOwner().getId(), user.getId()))
-            throw new GeneralException("Can not update own book", HttpStatus.NOT_ACCEPTABLE);
-    }
-
-    private void checkIfOwnerBook(Book book, User user){
-        if(!Objects.equals(book.getOwner().getId(), user.getId()))
-            throw new GeneralException("Can not update this book", HttpStatus.FORBIDDEN);
-    }
-
-    private void checkIfAlreadyBorrowed(Book book, User user){
-        if(Objects.equals(book.getOwner().getId(), user.getId()))
-            throw new GeneralException("Can not borrowed book", HttpStatus.NOT_ACCEPTABLE);
-    }
-
 
     
 }

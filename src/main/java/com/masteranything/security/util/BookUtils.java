@@ -1,12 +1,18 @@
 package com.masteranything.security.util;
 
+import java.util.Objects;
+
+import org.springframework.http.HttpStatus;
+
 import com.masteranything.security.dao.Book;
 import com.masteranything.security.dao.BookTransactionHistory;
+import com.masteranything.security.dao.User;
 import com.masteranything.security.dto.BookRequest;
 import com.masteranything.security.dto.BookResponse;
 import com.masteranything.security.dto.BorrowedBookResponse;
+import com.masteranything.security.exception.GeneralException;
 
-public class FactoryUtils {
+public class BookUtils {
 
     public static BookResponse convertToBookResponse(Book book){
         return BookResponse.builder()
@@ -46,5 +52,25 @@ public class FactoryUtils {
             .returned(history.isReturned())
             .returnApproval(history.isReturnApproved())
             .build();
+    }
+
+    public static void checkIfBookArchivedOrShareable(Book book){
+        if(book.isArchived() || !book.isShareable())
+            throw new GeneralException("Book unavailable", HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    public static void checkIfNotOwnerBook(Book book, User user){
+        if(Objects.equals(book.getOwner().getId(), user.getId()))
+            throw new GeneralException("Can not update own book", HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    public static void checkIfOwnerBook(Book book, User user){
+        if(!Objects.equals(book.getOwner().getId(), user.getId()))
+            throw new GeneralException("Can not update this book", HttpStatus.FORBIDDEN);
+    }
+
+    public static void checkIfAlreadyBorrowed(Book book, User user){
+        if(Objects.equals(book.getOwner().getId(), user.getId()))
+            throw new GeneralException("Can not borrowed book", HttpStatus.NOT_ACCEPTABLE);
     }
 }
