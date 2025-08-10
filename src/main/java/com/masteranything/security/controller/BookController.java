@@ -10,7 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.masteranything.security.dto.BookRequest;
 import com.masteranything.security.dto.BookResponse;
@@ -114,5 +116,15 @@ public class BookController {
         return ResponseEntity.status(HttpStatus.OK)
             .body(bookService.approveReturnBook(bookId, connectedUser));
     }
+
+    @PostMapping(value="/cover/{book-id}", consumes="multipart/form-data")
+    public ResponseEntity<?> uploadBookCoverPicture(@PathVariable Long bookId,
+        @RequestPart("file") MultipartFile file, Authentication connectedUser){
+        
+        bookService.uploadBookCoverPicture(file, bookId, connectedUser);
+        
+        return ResponseEntity.ok().build();
+    }
+
 
 }

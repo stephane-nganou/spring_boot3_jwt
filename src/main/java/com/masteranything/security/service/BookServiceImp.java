@@ -11,6 +11,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.masteranything.security.dao.Book;
 import com.masteranything.security.dao.BookSpecification;
@@ -33,6 +34,7 @@ public class BookServiceImp implements BookService {
 
     private final BookRepository bookRepository;
     private final BookTransactionHistoryRepository transactionHistoryRepository;
+    private final FileStorageService fileStorageService; 
 
     private final static String NOT_PERMITTED = "Operation Not Permitted";
     private final static String BOOK_NOT_FOUND = "No Book found with ID: ";
@@ -277,6 +279,25 @@ public class BookServiceImp implements BookService {
         bookTransactionHistory.setReturnApproved(false);
 
         return transactionHistoryRepository.save(bookTransactionHistory).getId();
+    }
+
+    @Override
+    public void uploadBookCoverPicture(MultipartFile file, Long bookId, Authentication connectedUser) {
+
+        var book = bookRepository.findById(bookId)
+            .orElseThrow(() -> new GeneralException(
+                BOOK_NOT_FOUND + bookId,
+                HttpStatus.NOT_FOUND
+            ));
+
+
+        var user = (User) connectedUser.getPrincipal();
+
+        checkIfOwnerBook(book, user);
+
+        var bookCover = fileStorageService.saveFile(file, bookId);
+        book.setBookCover(bookCover);
+        bookRepository.save(book);
     }
 
 

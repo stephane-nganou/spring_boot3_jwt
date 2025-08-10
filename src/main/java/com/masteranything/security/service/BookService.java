@@ -1,6 +1,7 @@
 package com.masteranything.security.service;
 
 import org.springframework.security.core.Authentication;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.masteranything.security.dto.BookRequest;
 import com.masteranything.security.dto.BookResponse;
@@ -30,4 +31,6 @@ public interface BookService {
     Long returnBorrowBook(Long bookId, Authentication connectedUser);
 
     Long approveReturnBook(Long bookId, Authentication connectedUser);
+
+    void uploadBookCoverPicture(MultipartFile file, Long bookId, Authentication connectedUser);
 }

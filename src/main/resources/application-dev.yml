@@ -47,5 +47,8 @@ spring:
       activation-url: '${frontend-host}/activate-account'
     subject:
       activation: 'Account activation'
+  file:
+    upload:
+      photos-output-path: ./uploads
 server:
   port: 8088
