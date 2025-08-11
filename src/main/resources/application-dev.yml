@@ -4,6 +4,7 @@ frontend-host: 'http://localhost:4200'
 spring:
   application:
     name: security
+    base-url: /api/v1/
   security:
     auth:
       header: Authorization

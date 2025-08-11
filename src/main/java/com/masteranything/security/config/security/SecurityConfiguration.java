@@ -39,8 +39,8 @@ public class SecurityConfiguration {
     httpSecurity
         .cors(Customizer.withDefaults())
         .csrf(AbstractHttpConfigurer::disable)
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers(
+        .authorizeHttpRequests(auth ->
+            auth.requestMatchers(
                 "/api/v1/auth/**",
                 "/v2/api-docs",
                 "/v3/api-docs",

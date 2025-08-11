@@ -30,7 +30,7 @@ public class BookController {
 
     private final BookService bookService;
 
-    @GetMapping
+    @GetMapping("/")
     public ResponseEntity<PageResponse<BookResponse>> getAllBooks(
         @RequestParam(name = "page", defaultValue="0", required=false) int page,
         @RequestParam(name = "size", defaultValue="10", required=false) int size,
@@ -41,7 +41,7 @@ public class BookController {
             .body(bookService.findAllBooks(page, size, connectedUser));
     }
 
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<Long> saveBook(
         @Valid @RequestBody BookRequest request, Authentication connectedUser
     ){
@@ -50,7 +50,7 @@ public class BookController {
             .body(bookService.save(request, connectedUser));
     }
 
-    @GetMapping("{book-id}")
+    @GetMapping("/{book-id}")
     public ResponseEntity<BookResponse> findBookById(@PathVariable("book-id") Long bookId ){
         // return new ResponseEntity<>(bookService.findById(bookId), HttpStatus.OK);
         return ResponseEntity.status(HttpStatus.OK)

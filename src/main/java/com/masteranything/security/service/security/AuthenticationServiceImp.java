@@ -4,13 +4,17 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import com.masteranything.security.dao.Role;
 import com.masteranything.security.dao.Token;
 import com.masteranything.security.dao.User;
 import com.masteranything.security.dto.AuthenticationRequest;
@@ -19,9 +23,11 @@ import com.masteranything.security.dto.EmailTemplateName;
 import com.masteranything.security.dto.ROLE;
 import com.masteranything.security.dto.RegisterRequest;
 import com.masteranything.security.exception.AuthenticationException;
+import com.masteranything.security.exception.GeneralException;
 import com.masteranything.security.exception.TokenException;
 import com.masteranything.security.repository.RoleRepository;
 import com.masteranything.security.repository.TokenRepository;
+import com.masteranything.security.repository.UserRepository;
 import com.masteranything.security.service.EmailService;
 import com.masteranything.security.service.UserService;
 
@@ -90,6 +96,13 @@ public class AuthenticationServiceImp implements AuthenticationService {
       );
       var claims = new HashMap<String, Object>();
       var user = ((User)auth.getPrincipal());
+      if(!user.isEnabled()){
+        throw new GeneralException("""
+          Account not enable jetzt. Please activate using the E-Mail you received the day 
+          of the registration.
+        """,
+        HttpStatus.FORBIDDEN);
+      }
 
       claims.put("fullName", user.getFullName());
       
@@ -107,8 +120,11 @@ public class AuthenticationServiceImp implements AuthenticationService {
   public void register(RegisterRequest registerRequest) throws MessagingException {
   
     // to do: better throws and handling of IllegalStateException
-    var userRole = roleRepository.findByName(ROLE.USER.name())
-    .orElseThrow(() -> new IllegalStateException("Role not found"));
+    var userRole = roleRepository.findByName(ROLE.USER.name());
+    if (userRole.isEmpty()){
+      userRole = saveDefaultRole();
+    }
+    //.orElseThrow(() -> new IllegalStateException("Role not found"));
 
     var user = User.builder()
         .firstName(registerRequest.firstName())
@@ -117,9 +133,10 @@ public class AuthenticationServiceImp implements AuthenticationService {
         .password(passwordEncoder.encode(registerRequest.password()))
         .accountLocked(false)
         .enabled(false)
-        .roles(List.of(userRole))
+        .roles(List.of(userRole.get()))
         .build();
 
+    userService.saveUser(user);
     
     sendValidationEmail(user);
   }
@@ -151,6 +168,14 @@ public class AuthenticationServiceImp implements AuthenticationService {
     emailService.sendEmail(
       user.getEmail(), user.getFullName(),
       EmailTemplateName.ACTIVATION_ACCOUNT, ACTIVATION_URL, newToken, ACTIVATION_SUBJECT);
+  }
+
+  private Optional<Role> saveDefaultRole(){
+    Role defaultRole = roleRepository.save(Role.builder()
+                          .name(ROLE.USER.name())
+                          .build());
+
+    return Optional.of(defaultRole);
   }
 
   private String generateAndSaveActivationToken(User user) {

@@ -27,7 +27,7 @@ import lombok.RequiredArgsConstructor;
  */
 
 @RestController
-@RequestMapping("auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 //@Tag(name = "Authentication Controller", description = "This controller is responsible for handling authentication requests.")
 public class AuthenticationController {
@@ -54,7 +54,7 @@ public class AuthenticationController {
    * @return AuthenticationResponse
    * @throws MessagingException 
    */
-  @PostMapping("register")
+  @PostMapping("/register")
   public ResponseEntity<?> register(
       @RequestBody @Valid RegisterRequest registerRequest) throws MessagingException {
 
@@ -64,7 +64,7 @@ public class AuthenticationController {
     return ResponseEntity.accepted().build();
   }
 
-  @GetMapping("activate-account")
+  @GetMapping("/activate-account")
   public ResponseEntity<?> confirm(@RequestParam @Nonnull String token) throws MessagingException{
     authenticationService.activateAccount(token);
 
