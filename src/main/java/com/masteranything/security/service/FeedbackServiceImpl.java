@@ -58,7 +58,7 @@ public class FeedbackServiceImpl implements FeedbackService {
 
         var user = (User) connectedUser.getPrincipal();
 
-        Page<Feedback> feedbacks = feedbackRepository.findAllByBookIf(pageable, bookId);
+        Page<Feedback> feedbacks = feedbackRepository.findAllByBookId(pageable, bookId);
         
         List<FeedbackResponse> feedbackResponse = feedbacks.stream()
                                                     .map(feedback -> FeedbackUtils.convertToFeedbackResponse(feedback, user.getId()))
