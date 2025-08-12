@@ -24,13 +24,13 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
-@RequestMapping("books")
+@RequestMapping("/api/v1/books")
 @RequiredArgsConstructor
 public class BookController {
 
     private final BookService bookService;
 
-    @GetMapping("/")
+    @GetMapping()
     public ResponseEntity<PageResponse<BookResponse>> getAllBooks(
         @RequestParam(name = "page", defaultValue="0", required=false) int page,
         @RequestParam(name = "size", defaultValue="10", required=false) int size,
@@ -41,7 +41,7 @@ public class BookController {
             .body(bookService.findAllBooks(page, size, connectedUser));
     }
 
-    @PostMapping("/")
+    @PostMapping()
     public ResponseEntity<Long> saveBook(
         @Valid @RequestBody BookRequest request, Authentication connectedUser
     ){

@@ -40,7 +40,8 @@ public class AuthenticationController {
    * @param authenticationRequest as AuthenticationRequest
    * @return AuthenticationResponse
    */
-  @PostMapping("/")
+  @PostMapping()
+  // Endpoint tested
   public ResponseEntity<AuthenticationResponse> authenticate(
       @RequestBody @Valid AuthenticationRequest authenticationRequest) {
 
@@ -55,6 +56,7 @@ public class AuthenticationController {
    * @throws MessagingException 
    */
   @PostMapping("/register")
+  // Endpoint tested
   public ResponseEntity<?> register(
       @RequestBody @Valid RegisterRequest registerRequest) throws MessagingException {
 
@@ -65,6 +67,7 @@ public class AuthenticationController {
   }
 
   @GetMapping("/activate-account")
+  // Endpoint tested
   public ResponseEntity<?> confirm(@RequestParam @Nonnull String token) throws MessagingException{
     authenticationService.activateAccount(token);
 
