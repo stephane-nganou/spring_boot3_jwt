@@ -1,5 +1,6 @@
 package com.masteranything.security.dao;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -17,7 +18,9 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class Feedback extends BaseEntityAuditAware{
 
+    @Column(nullable = false)
     private Double note;
+    
     private String comment;
 
     @ManyToOne

@@ -31,6 +31,7 @@ public class BookController {
     private final BookService bookService;
 
     @GetMapping()
+    // Endpoint tested
     public ResponseEntity<PageResponse<BookResponse>> getAllBooks(
         @RequestParam(name = "page", defaultValue="0", required=false) int page,
         @RequestParam(name = "size", defaultValue="10", required=false) int size,
@@ -42,6 +43,7 @@ public class BookController {
     }
 
     @PostMapping()
+    // Endpoint tested
     public ResponseEntity<Long> saveBook(
         @Valid @RequestBody BookRequest request, Authentication connectedUser
     ){
@@ -51,6 +53,7 @@ public class BookController {
     }
 
     @GetMapping("/{book-id}")
+    // Endpoint tested
     public ResponseEntity<BookResponse> findBookById(@PathVariable("book-id") Long bookId ){
         // return new ResponseEntity<>(bookService.findById(bookId), HttpStatus.OK);
         return ResponseEntity.status(HttpStatus.OK)
@@ -58,6 +61,7 @@ public class BookController {
     }
 
     @GetMapping("/owner")
+    // Endpoint tested
     public ResponseEntity<PageResponse<BookResponse>> getAllBooksByOwner(
         @RequestParam(name = "page", defaultValue="0", required=false) int page,
         @RequestParam(name = "size", defaultValue="10", required=false) int size,

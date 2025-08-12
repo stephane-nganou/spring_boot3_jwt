@@ -3,6 +3,7 @@ package com.masteranything.security.dao;
 
 import java.util.List;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
@@ -22,12 +23,22 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class Book extends BaseEntityAuditAware {
 
+    @Column(nullable = false)
     private String title;
+
+    @Column(nullable = false)
     private String authorName;
+
+    @Column(nullable = false)
     private String isbn;
+
+    @Column(nullable = false)
     private String synopsis;
+
     private String bookCover;
     private boolean archived;
+
+    @Column(nullable = false)
     private boolean shareable;
 
     @ManyToOne

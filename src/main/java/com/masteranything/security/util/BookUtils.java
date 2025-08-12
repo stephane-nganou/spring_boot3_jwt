@@ -38,6 +38,7 @@ public class BookUtils {
             .synopsis(request.synopsis())
             .archived(false)
             .shareable(request.shareable())
+            .isbn(request.isbn())
             .build();
     }
 

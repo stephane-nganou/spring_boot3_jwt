@@ -17,7 +17,7 @@ public class FileUtils {
     private static final Logger logger = LoggerFactory.getLogger(FileUtils.class);
 
     public static byte[] readFileFromLocation(String fileUrl){
-        if (fileUrl.isBlank()){
+        if (null == fileUrl || fileUrl.isBlank()){
             return null;
         }
 
