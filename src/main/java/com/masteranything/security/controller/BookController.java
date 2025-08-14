@@ -30,7 +30,7 @@ public class BookController {
 
     private final BookService bookService;
 
-    @GetMapping()
+    @GetMapping("/")
     // Endpoint tested
     public ResponseEntity<PageResponse<BookResponse>> getAllBooks(
         @RequestParam(name = "page", defaultValue="0", required=false) int page,
@@ -42,7 +42,7 @@ public class BookController {
             .body(bookService.findAllBooks(page, size, connectedUser));
     }
 
-    @PostMapping()
+    @PostMapping("/")
     // Endpoint tested
     public ResponseEntity<Long> saveBook(
         @Valid @RequestBody BookRequest request, Authentication connectedUser

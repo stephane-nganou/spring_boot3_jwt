@@ -40,7 +40,7 @@ public class AuthenticationController {
    * @param authenticationRequest as AuthenticationRequest
    * @return AuthenticationResponse
    */
-  @PostMapping()
+  @PostMapping("/")
   // Endpoint tested
   public ResponseEntity<AuthenticationResponse> authenticate(
       @RequestBody @Valid AuthenticationRequest authenticationRequest) {

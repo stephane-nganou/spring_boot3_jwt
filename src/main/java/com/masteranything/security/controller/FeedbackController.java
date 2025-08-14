@@ -26,7 +26,7 @@ public class FeedbackController {
 
     private final FeedbackService feedbackService;
 
-    @PostMapping
+    @PostMapping("/")
     public ResponseEntity<Long> saveFeedback(
         @Valid @RequestBody FeedbackRequest request, 
         Authentication connectedUser) {
