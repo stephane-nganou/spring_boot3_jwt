@@ -15,6 +15,8 @@ import com.masteranything.security.dto.AuthenticationResponse;
 import com.masteranything.security.dto.RegisterRequest;
 import com.masteranything.security.service.security.AuthenticationService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nonnull;
 import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
@@ -29,6 +31,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
+@Tag(name="Authentication")
 //@Tag(name = "Authentication Controller", description = "This controller is responsible for handling authentication requests.")
 public class AuthenticationController {
 
@@ -42,6 +45,7 @@ public class AuthenticationController {
    */
   @PostMapping("/")
   // Endpoint tested
+  @Operation(summary = "authenticate endpoint")
   public ResponseEntity<AuthenticationResponse> authenticate(
       @RequestBody @Valid AuthenticationRequest authenticationRequest) {
 

@@ -51,5 +51,9 @@ spring:
   file:
     upload:
       photos-output-path: ./uploads
+
 server:
   port: 8088
+springdoc:
+  swagger-ui:
+    enabled: true

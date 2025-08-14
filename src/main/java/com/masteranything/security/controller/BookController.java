@@ -20,12 +20,14 @@ import com.masteranything.security.dto.BorrowedBookResponse;
 import com.masteranything.security.dto.PageResponse;
 import com.masteranything.security.service.BookService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/books")
 @RequiredArgsConstructor
+@Tag(name="Book")
 public class BookController {
 
     private final BookService bookService;

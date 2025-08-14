@@ -16,12 +16,14 @@ import com.masteranything.security.dto.FeedbackResponse;
 import com.masteranything.security.dto.PageResponse;
 import com.masteranything.security.service.FeedbackService;
 
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 @RestController
 @RequestMapping("/api/v1/feedbacks")
 @RequiredArgsConstructor
+@Tag(name="Feedback")
 public class FeedbackController {
 
     private final FeedbackService feedbackService;
