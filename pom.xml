@@ -29,7 +29,13 @@
 	<properties>
 		<java.version>21</java.version>
 		<spring-ai.version>1.0.0</spring-ai.version>
+        <docker.image.tag>${project.version}</docker.image.tag>
+		<docker.skip.build>false</docker.skip.build>
+		<docker.maven.plugin.version>0.45.0</docker.maven.plugin.version>
+		<docker.registry.url>docker.io/</docker.registry.url>
+		<docker.java.version>21</docker.java.version>
 	</properties>
+	
 	<dependencyManagement>
 		<dependencies>
 			<dependency>
@@ -126,6 +132,43 @@
 
 	<build>
 		<plugins>
+			<plugin>
+				<groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>${docker.maven.plugin.version}</version>
+				<executions>
+                    <execution>
+                        <id>build</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>build</goal>
+                        </goals>
+                    </execution>
+                </executions>
+				<configuration>
+					<skip>${docker.skip.build}</skip>
+                    <imagePullPolicy>Always</imagePullPolicy>
+                    <autoCreateCustomNetworks>true</autoCreateCustomNetworks>
+                    <skipExtendedAuth>true</skipExtendedAuth>
+                    <pushRegistry>${docker.registry.url}</pushRegistry>
+					<images>
+                        <image>
+                            <name>${docker.registry.url}${project.artifactId}</name>
+                            <build>
+                                <args>
+                                    <JDK_IMAGE>${docker.java.version}-jdk-slim</JDK_IMAGE>
+                                    <JRE_IMAGE>${docker.java.version}-jre-alpine</JRE_IMAGE>
+                                </args>
+                                <cleanup>remove</cleanup>
+                                <dockerFileDir>${project.basedir}</dockerFileDir>
+                                <tags>
+                                    <tag>${docker.image.tag}</tag>
+                                </tags>
+                            </build>
+                            </image>
+                        </images>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
