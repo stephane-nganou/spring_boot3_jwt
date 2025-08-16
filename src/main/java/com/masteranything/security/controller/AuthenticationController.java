@@ -16,6 +16,8 @@ import com.masteranything.security.dto.RegisterRequest;
 import com.masteranything.security.service.security.AuthenticationService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Nonnull;
 import jakarta.mail.MessagingException;
@@ -31,7 +33,7 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
-@Tag(name="Authentication")
+@Tag(name="Authentication", description="To manage Authentication")
 //@Tag(name = "Authentication Controller", description = "This controller is responsible for handling authentication requests.")
 public class AuthenticationController {
 
@@ -45,7 +47,10 @@ public class AuthenticationController {
    */
   @PostMapping("/")
   // Endpoint tested
-  @Operation(summary = "authenticate endpoint")
+  @Operation(summary="authenticate", description="Submit credentials to get valid token")
+  @ApiResponses({
+    @ApiResponse(responseCode="200", description="valid token returned successfully")
+  })
   public ResponseEntity<AuthenticationResponse> authenticate(
       @RequestBody @Valid AuthenticationRequest authenticationRequest) {
 
@@ -61,6 +66,10 @@ public class AuthenticationController {
    */
   @PostMapping("/register")
   // Endpoint tested
+  @Operation(summary="register", description="Submit data to register a new user")
+  @ApiResponses({
+    @ApiResponse(responseCode="202", description="User register successfully")
+  })
   public ResponseEntity<?> register(
       @RequestBody @Valid RegisterRequest registerRequest) throws MessagingException {
 
@@ -72,6 +81,10 @@ public class AuthenticationController {
 
   @GetMapping("/activate-account")
   // Endpoint tested
+  @Operation(summary="confirm", description="Confirm User in other to activate the account.")
+  @ApiResponses({
+    @ApiResponse(responseCode="200", description="Activation confirmed")
+  })
   public ResponseEntity<?> confirm(@RequestParam @Nonnull String token) throws MessagingException{
     authenticationService.activateAccount(token);
 

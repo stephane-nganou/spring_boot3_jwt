@@ -32,7 +32,8 @@
         <docker.image.tag>${project.version}</docker.image.tag>
 		<docker.skip.build>false</docker.skip.build>
 		<docker.maven.plugin.version>0.45.0</docker.maven.plugin.version>
-		<docker.registry.url>docker.io/</docker.registry.url>
+		<docker.registry.url>docker.io</docker.registry.url>
+		<registry.url>greatness</registry.url>
 		<docker.java.version>21</docker.java.version>
 	</properties>
 	
@@ -153,7 +154,7 @@
                     <pushRegistry>${docker.registry.url}</pushRegistry>
 					<images>
                         <image>
-                            <name>${docker.registry.url}${project.artifactId}</name>
+                            <name>${registry.url}/${docker.registry.url}/${project.artifactId}</name>
                             <build>
                                 <args>
                                     <JDK_IMAGE>${docker.java.version}-jdk-slim</JDK_IMAGE>

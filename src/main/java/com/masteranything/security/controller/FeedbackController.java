@@ -16,6 +16,9 @@ import com.masteranything.security.dto.FeedbackResponse;
 import com.masteranything.security.dto.PageResponse;
 import com.masteranything.security.service.FeedbackService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +26,18 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/feedbacks")
 @RequiredArgsConstructor
-@Tag(name="Feedback")
+@Tag(name="Feedback", description="Handles everything related to Feedback component")
 public class FeedbackController {
 
     private final FeedbackService feedbackService;
 
     @PostMapping("/")
+    @Operation(summary="saveFeedback", description="Submit data to save a new Feedback")
+    @ApiResponses({
+        @ApiResponse(responseCode="200", description="Feedback saved successfully"),
+        @ApiResponse(responseCode="404", description="Book not found"),
+        @ApiResponse(responseCode="406", description="Can not add feedback to the given book")
+    })
     public ResponseEntity<Long> saveFeedback(
         @Valid @RequestBody FeedbackRequest request, 
         Authentication connectedUser) {
@@ -37,6 +46,11 @@ public class FeedbackController {
         }
     
     @GetMapping("/book/{book-id}")
+    @Operation(summary="findAllFeedbackByBook", description="Get all feedbacks for given Book")
+    @ApiResponses({
+        @ApiResponse(responseCode="200", description="Operation successfully"),
+        @ApiResponse(responseCode="404", description="Book not found")
+    })
     public ResponseEntity<PageResponse<FeedbackResponse>> findAllFeedbackByBook(
         @PathVariable("book-id") Long bookId,
         @RequestParam(name = "page", defaultValue = "0", required = false) int page,
