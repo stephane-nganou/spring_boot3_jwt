@@ -2,11 +2,13 @@ package com.masteranything.security.config.security;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -25,7 +27,6 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.MediaType;
 
 /**
  * @author MasterAnything
@@ -70,11 +71,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       response.setContentType(MediaType.APPLICATION_JSON_VALUE);
       response.setStatus(HttpStatus.UNAUTHORIZED.value());
       
-      ErrorDetails errorDetails = new ErrorDetails(
-                LocalDateTime.now(),
-                "Invalid JWT token",
-                e.getMessage()
-            );
+      ErrorDetails errorDetails = ErrorDetails.builder()
+                                    .timestamp(LocalDateTime.now())
+                                    .errorMessage("Invalid JWT token")
+                                    .validationErrors(List.of())
+                                    .details("")
+                                    .build();
+      
 
             
             // Let Spring's HttpMessageConverter handle serialization
@@ -107,7 +110,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         return String.format(
             "{\"timestamp\":\"%s\",\"message\":\"%s\",\"details\":\"%s\"}",
             errorDetails.timestamp(),
-            errorDetails.message(),
+            errorDetails.errorMessage(),
             errorDetails.details()
         );
     }

@@ -1,8 +1,12 @@
 package com.masteranything.security.exception;
 
 import java.time.LocalDateTime;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +47,13 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
 
         logger.error(errors.toString());
 
-        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), errors.toString(),
-            request.getDescription(false));
+        ErrorDetails errorDetails = ErrorDetails.builder()
+                                      .timestamp(LocalDateTime.now())
+                                      .errorMessage("Missing field/(s)")
+                                      .validationErrors(errors.stream().collect(Collectors.toList()))
+                                      .details(request.getDescription(false))
+                                      .build();
+    
 
         return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
     }
@@ -53,8 +62,14 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
   public final ResponseEntity<ErrorDetails> handleAllException(Exception ex, WebRequest request) {
       logger.error("In ExceptionHandler: {}", ex.getMessage());
 
-      ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "Server error occurred",
-        request.getDescription(false));
+      ErrorDetails errorDetails =  ErrorDetails.builder()
+                                    .timestamp(LocalDateTime.now())
+                                    .errorMessage("Server error occurred")
+                                    .validationErrors(List.of())
+                                    .details(request.getDescription(false))
+                                    .build();
+    
+
 
       return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
   }
@@ -65,8 +80,12 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
       WebRequest request) {
     logger.error("In AuthenticationExceptionHandler: {}", ex.getMessage());
 
-    ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(),
-        request.getDescription(false));
+    ErrorDetails errorDetails = ErrorDetails.builder()
+                                    .timestamp(LocalDateTime.now())
+                                    .errorMessage(ex.getMessage())
+                                    .validationErrors(List.of())
+                                    .details(request.getDescription(false))
+                                    .build();
 
     return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
   }
@@ -76,8 +95,12 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
       WebRequest request) {
     logger.error("In InternalAuthenticationServiceExceptionHandler: {}", ex.getMessage());
 
-    ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "wrong User or Password",
-        request.getDescription(false));
+    ErrorDetails errorDetails = ErrorDetails.builder()
+                                    .timestamp(LocalDateTime.now())
+                                    .errorMessage("wrong User or Password")
+                                    .validationErrors(List.of())
+                                    .details(request.getDescription(false))
+                                    .build();
 
     return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
   }
@@ -87,8 +110,12 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
       WebRequest request) {
     logger.error("In MessagingExceptionHandler: {}", ex.getMessage());
 
-    ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "Failed sending mail",
-        request.getDescription(false));
+    ErrorDetails errorDetails = ErrorDetails.builder()
+                                    .timestamp(LocalDateTime.now())
+                                    .errorMessage("Failed sending mail")
+                                    .validationErrors(List.of())
+                                    .details(request.getDescription(false))
+                                    .build();
 
     return new ResponseEntity<>(errorDetails, HttpStatus.SERVICE_UNAVAILABLE);
   }
@@ -98,8 +125,12 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
       WebRequest request) {
      logger.error("In TokenExceptionHandler: {}", ex.getMessage());
 
-    ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(),
-        request.getDescription(false));
+    ErrorDetails errorDetails = ErrorDetails.builder()
+                                    .timestamp(LocalDateTime.now())
+                                    .errorMessage(ex.getMessage())
+                                    .validationErrors(List.of())
+                                    .details(request.getDescription(false))
+                                    .build();
 
     return new ResponseEntity<>(errorDetails, HttpStatus.FORBIDDEN);
   }
@@ -109,8 +140,12 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
       WebRequest request) {
     logger.error("In GeneralExceptionHandler: {}", ex.getMessage());
 
-    ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(),
-        request.getDescription(false));
+    ErrorDetails errorDetails = ErrorDetails.builder()
+                                    .timestamp(LocalDateTime.now())
+                                    .errorMessage(ex.getMessage())
+                                    .validationErrors(List.of())
+                                    .details(request.getDescription(false))
+                                    .build();
 
     return new ResponseEntity<>(errorDetails, ex.getStatus());
   }
