@@ -27,7 +27,6 @@ import com.masteranything.security.exception.GeneralException;
 import com.masteranything.security.exception.TokenException;
 import com.masteranything.security.repository.RoleRepository;
 import com.masteranything.security.repository.TokenRepository;
-import com.masteranything.security.repository.UserRepository;
 import com.masteranything.security.service.EmailService;
 import com.masteranything.security.service.UserService;
 

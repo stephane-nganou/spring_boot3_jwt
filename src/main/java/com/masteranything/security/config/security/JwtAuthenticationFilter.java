@@ -1,10 +1,12 @@
 package com.masteranything.security.config.security;
 
 import java.io.IOException;
+import java.time.LocalDateTime;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -13,14 +15,17 @@ import org.springframework.security.web.authentication.WebAuthenticationDetailsS
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
+import com.masteranything.security.dto.ErrorDetails;
 import com.masteranything.security.service.security.JwtService;
 
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
 
 /**
  * @author MasterAnything
@@ -46,17 +51,35 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   protected void doFilterInternal(@Nonnull HttpServletRequest request,
       @Nonnull HttpServletResponse response,
       @Nonnull FilterChain filterChain) throws ServletException, IOException {
-    if(request.getServletPath().contains("/api/v1/auth")){
-      filterChain.doFilter(request, response);
-      return ;
-    }
 
-    final String authorizationHeader = request.getHeader(authHeader);
+    try{
+      if(request.getServletPath().contains("/api/v1/auth")){
+        filterChain.doFilter(request, response);
+        return ;
+      }
 
-    if (null == authorizationHeader || !authorizationHeader.startsWith(authBearer)) {
-      filterChain.doFilter(request, response);
-    } else {
-      handleNewAuthentication(request, response, filterChain);
+      final String authorizationHeader = request.getHeader(authHeader);
+
+      if (null == authorizationHeader || !authorizationHeader.startsWith(authBearer)) {
+        filterChain.doFilter(request, response);
+      } else {
+        handleNewAuthentication(request, response, filterChain);
+      }
+    } catch (MalformedJwtException e) {
+      logger.error("JWT authentication error: {}", e.getMessage());
+      response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+      response.setStatus(HttpStatus.UNAUTHORIZED.value());
+      
+      ErrorDetails errorDetails = new ErrorDetails(
+                LocalDateTime.now(),
+                "Invalid JWT token",
+                e.getMessage()
+            );
+
+            
+            // Let Spring's HttpMessageConverter handle serialization
+      response.getWriter().write(convertToJson(errorDetails));
+      response.getWriter().flush();
     }
   }
 
@@ -79,5 +102,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       }
     }
   }
+
+  private String convertToJson(ErrorDetails errorDetails) {
+        return String.format(
+            "{\"timestamp\":\"%s\",\"message\":\"%s\",\"details\":\"%s\"}",
+            errorDetails.timestamp(),
+            errorDetails.message(),
+            errorDetails.details()
+        );
+    }
   
 }

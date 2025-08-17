@@ -6,7 +6,9 @@ import java.util.Set;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.InternalAuthenticationServiceException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -25,24 +27,43 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
   private final Logger logger = LoggerFactory.getLogger(
       CustomizeResponseEntityExceptionHandler.class);
 
+  
+  @Override
+  protected ResponseEntity<Object> handleMethodArgumentNotValid(
+      MethodArgumentNotValidException ex,
+      HttpHeaders headers,
+      HttpStatusCode status,
+      WebRequest request) {
+    
+        Set<String> errors = new HashSet<>();
+        ex.getBindingResult().getAllErrors()
+          .forEach(error -> {
+            errors.add(error.getDefaultMessage());
+          });
+
+        logger.error(errors.toString());
+
+        ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), errors.toString(),
+            request.getDescription(false));
+
+        return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
+    }
+  
   @ExceptionHandler(Exception.class)
   public final ResponseEntity<ErrorDetails> handleAllException(Exception ex, WebRequest request) {
-    logger.info(ex.getMessage());
+      logger.error("In ExceptionHandler: {}", ex.getMessage());
 
-    if (ex instanceof MethodArgumentNotValidException castEx) {
-      return handleMethodArgumentNotValidException(castEx, request);
-    } else {
       ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "Server error occurred",
         request.getDescription(false));
 
-    return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
+      return new ResponseEntity<>(errorDetails, HttpStatus.INTERNAL_SERVER_ERROR);
   }
+
 
   @ExceptionHandler(AuthenticationException.class)
   public final ResponseEntity<ErrorDetails> handleAuthenticationException(AuthenticationException ex,
       WebRequest request) {
-    logger.info(ex.getMessage());
+    logger.error("In AuthenticationExceptionHandler: {}", ex.getMessage());
 
     ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(),
         request.getDescription(false));
@@ -53,7 +74,7 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
   @ExceptionHandler(InternalAuthenticationServiceException.class)
   public final ResponseEntity<ErrorDetails> handleInternalAuthenticationServiceException(InternalAuthenticationServiceException ex,
       WebRequest request) {
-    logger.info(ex.getMessage());
+    logger.error("In InternalAuthenticationServiceExceptionHandler: {}", ex.getMessage());
 
     ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "wrong User or Password",
         request.getDescription(false));
@@ -64,7 +85,7 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
   @ExceptionHandler(MessagingException.class)
   public final ResponseEntity<ErrorDetails> handleMessagingException(MessagingException ex,
       WebRequest request) {
-    logger.info(ex.getMessage());
+    logger.error("In MessagingExceptionHandler: {}", ex.getMessage());
 
     ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), "Failed sending mail",
         request.getDescription(false));
@@ -75,7 +96,7 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
   @ExceptionHandler(TokenException.class)
   public final ResponseEntity<ErrorDetails> handleTokenException(Exception ex,
       WebRequest request) {
-    logger.info(ex.getMessage());
+     logger.error("In TokenExceptionHandler: {}", ex.getMessage());
 
     ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(),
         request.getDescription(false));
@@ -86,7 +107,7 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
   @ExceptionHandler(GeneralException.class)
   public final ResponseEntity<ErrorDetails> handleGeneralException(GeneralException ex,
       WebRequest request) {
-    logger.info(ex.getMessage());
+    logger.error("In GeneralExceptionHandler: {}", ex.getMessage());
 
     ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), ex.getMessage(),
         request.getDescription(false));
@@ -94,21 +115,4 @@ public class CustomizeResponseEntityExceptionHandler extends ResponseEntityExcep
     return new ResponseEntity<>(errorDetails, ex.getStatus());
   }
 
-
-  private ResponseEntity<ErrorDetails> handleMethodArgumentNotValidException(MethodArgumentNotValidException ex, 
-    WebRequest request) {
-
-        Set<String> errors = new HashSet<>();
-        ex.getBindingResult().getAllErrors()
-          .forEach(error -> {
-            errors.add(error.getDefaultMessage());
-          });
-
-    logger.info(errors.toString());
-
-    ErrorDetails errorDetails = new ErrorDetails(LocalDateTime.now(), errors.toString(),
-        request.getDescription(false));
-
-    return new ResponseEntity<>(errorDetails, HttpStatus.BAD_REQUEST);
-  }
 }
