@@ -10,6 +10,7 @@ This project serves as a reference implementation for developers looking to unde
 - **Exception Handling**: Structured and consistent error management for improved reliability.
 - **Clean Code Principles**: Writing readable, modular, and maintainable code.
 - **SOLID Principles**: Designing code that is scalable, maintainable, and adheres to object-oriented design principles.
+- **Testing Best Practices**: Write comprehensives Init- and Integration Tests. May be E2E Tests with Karate will be included.
 
 ## Features
 - **JWT-based Authentication**: Secure user authentication and session management using JSON Web Tokens.
