@@ -261,6 +261,25 @@ class BookServiceImpTest {
         assertEquals(true, response.content().getFirst().returnApproval());
         assertEquals(true, response.content().getFirst().returned());
     }
+
+    @Test
+    void whenUpdateShareableStatusWithExistingBookAndOwner_ThenReturnBookId(){
+        
+        // prepare
+        boolean oldStatus = book.isShareable();
+        when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(book));
+        when(connectedUser.getPrincipal()).thenReturn(user);
+
+        // test
+        Long updatedBookId = bookService.updateShareableStatus(book.getId(), connectedUser);
+
+        // verify
+        verify(bookRepository, times(1)).save(any(Book.class));
+        assertEquals(book.getId(), updatedBookId);
+        assertEquals(!oldStatus, book.isShareable());
+    }
+
+    
         
     
 
