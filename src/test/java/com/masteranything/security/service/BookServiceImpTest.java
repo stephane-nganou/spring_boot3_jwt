@@ -23,10 +23,12 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
 import com.masteranything.security.dao.Book;
+import com.masteranything.security.dao.BookTransactionHistory;
 import com.masteranything.security.dao.User;
 import com.masteranything.security.dto.BookRequest;
 import com.masteranything.security.dto.BookResponse;
@@ -62,6 +64,7 @@ class BookServiceImpTest {
     private BookRequest bookRequest;
 
     @BeforeEach
+    @SuppressWarnings("It is used")
     void setUp() {
         user = new User();
         user.setId(1L);
@@ -154,5 +157,56 @@ class BookServiceImpTest {
         verify(bookRepository, times(1))
                 .findAllDisplayableBooks(any(Pageable.class), any(Long.class));
     }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void whenFindAllBooksByOwnerWithValidPageRequest_ThenReturnValidPageResponse(){
+
+        // prepare
+        Page<Book> page = new PageImpl<>(List.of(book));
+        when(connectedUser.getPrincipal()).thenReturn(user);
+        when(bookRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+
+        // test
+        PageResponse<BookResponse> response = bookService.findAllBooksByOwner(0, 10, connectedUser);
+
+        // verify
+        assertNotNull(response);
+        verify(bookRepository, times(1))
+                .findAll(any(Specification.class), any(Pageable.class));
+        assertEquals(1, response.content().size());
+        assertEquals(1L, response.totalElements());
+        assertEquals(1L, response.totalPages());
+    }
+
+    @SuppressWarnings("unchecked")
+    @Test
+    void whenFindAllBooksByOwnerWithValidPageRequestAndNoOwnBook_ThenReturnEmptyValidPageResponse(){
+
+        // prepare
+        BookTransactionHistory transactionHistory = BookTransactionHistory.builder()
+                                                        .book(book)
+                                                        .user(user)
+                                                        .returned(false)
+                                                        .returnApproved(false)
+                                                        .build();
+
+        Page<BookTransactionHistory> page = new PageImpl<>(List.of(transactionHistory));
+        when(connectedUser.getPrincipal()).thenReturn(user);
+        when(bookRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
+
+        // test
+        PageResponse<BookResponse> response = bookService.findAllBooksByOwner(0, 10, connectedUser);
+
+        // verify
+        assertNotNull(response);
+        verify(bookRepository, times(1))
+                .findAll(any(Specification.class), any(Pageable.class));
+        assertEquals(0, response.content().size());
+        assertEquals(0L, response.totalElements());
+        assertEquals(1L, response.totalPages());
+    }
+
+    
 
 }
