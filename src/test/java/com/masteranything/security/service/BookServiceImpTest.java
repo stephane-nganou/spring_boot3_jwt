@@ -126,7 +126,7 @@ class BookServiceImpTest {
                     () -> bookService.findById(bookId));
 
         // verify
-        assertEquals("No Book found with ID: 2", bookNotFoundException.getMessage());
+        assertEquals("No Book found with ID: " + bookId, bookNotFoundException.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, bookNotFoundException.getStatus());
         verify(bookRepository).findById(bookId);
 
