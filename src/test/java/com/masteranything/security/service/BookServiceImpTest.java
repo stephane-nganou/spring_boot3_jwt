@@ -279,7 +279,26 @@ class BookServiceImpTest {
         assertEquals(!oldStatus, book.isShareable());
     }
 
-    
+    @Test
+    void whenUpdateShareableStatusWithExistingBookAndNotOwner_ThenThrowsGeneralException(){
+        
+        // prepare
+        User user_2 = User.builder()
+                        .id(2L)
+                        .build();
+        when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(book));
+        when(connectedUser.getPrincipal()).thenReturn(user_2);
+
+        // test
+        GeneralException updateBookStatusNotPermit = assertThrows(GeneralException.class,
+                    () -> bookService.updateShareableStatus(book.getId(), connectedUser));
+
+
+        // verify
+        assertEquals("Operation Not Permitted", updateBookStatusNotPermit.getMessage());
+        assertEquals(HttpStatus.FORBIDDEN, updateBookStatusNotPermit.getStatus());
+        verify(bookRepository).findById(any(Long.class));
+    }
         
     
 
