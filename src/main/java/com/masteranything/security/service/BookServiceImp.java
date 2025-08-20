@@ -2,7 +2,6 @@ package com.masteranything.security.service;
 
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Predicate;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -64,9 +63,9 @@ public class BookServiceImp implements BookService {
         var user = (User) connectedUser.getPrincipal();
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
         Page<Book> books = bookRepository.findAllDisplayableBooks(pageable, user.getId());
-        Predicate<Book> isNotArchivePredicate = book -> !book.isArchived();
+        //Predicate<Book> isNotArchivePredicate = book -> !book.isArchived();
         List<BookResponse> bookResponse = books.stream()
-                                                .filter(isNotArchivePredicate)
+                                                //.filter(isNotArchivePredicate)
                                                 .map(BookUtils::convertToBookResponse)
                                                 .toList();
 
@@ -136,11 +135,11 @@ public class BookServiceImp implements BookService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdDate").descending());
 
         
-        Page<BookTransactionHistory> allBorrowedBooks = transactionHistoryRepository.findAllBorrowedBooks(pageable, user.getId());
+        Page<BookTransactionHistory> allBorrowedBooks = transactionHistoryRepository.findAllReturnedBooks(pageable, user.getId());
 
-        Predicate<BookTransactionHistory> bookReturnedPredicate = history -> (history.isReturnApproved()) && (history.isReturned());
+        //Predicate<BookTransactionHistory> bookReturnedPredicate = history -> (history.isReturnApproved()) && (history.isReturned());
         List<BorrowedBookResponse> borrowedBookResponse = allBorrowedBooks.stream()
-                                                .filter(bookReturnedPredicate)
+                                                //.filter(bookReturnedPredicate)
                                                 .map(BookUtils::convertToBorrowedBookResponse)
                                                 .toList();
 
