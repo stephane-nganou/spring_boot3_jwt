@@ -126,7 +126,7 @@ class BookServiceImpTest {
                     () -> bookService.findById(bookId));
 
         // verify
-        assertEquals("No Book found. Id: 2", bookNotFoundException.getMessage());
+        assertEquals("No Book found with ID: 2", bookNotFoundException.getMessage());
         assertEquals(HttpStatus.NOT_FOUND, bookNotFoundException.getStatus());
         verify(bookRepository).findById(bookId);
 
@@ -298,6 +298,23 @@ class BookServiceImpTest {
         assertEquals("Operation Not Permitted", updateBookStatusNotPermit.getMessage());
         assertEquals(HttpStatus.FORBIDDEN, updateBookStatusNotPermit.getStatus());
         verify(bookRepository).findById(any(Long.class));
+    }
+
+    @Test
+    void whenUpdateShareableStatusWithNonExistingBook_ThenThrowsGeneralException(){
+        
+        // prepare
+        when(bookRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+        
+        // test
+        GeneralException bookNotFoundException = assertThrows(GeneralException.class,
+                    () -> bookService.updateShareableStatus(book.getId(), connectedUser));
+
+        // verify
+        assertEquals("No Book found with ID: " + book.getId(), bookNotFoundException.getMessage());
+        assertEquals(HttpStatus.NOT_FOUND, bookNotFoundException.getStatus());
+        verify(bookRepository).findById(any(Long.class));
+
     }
         
     

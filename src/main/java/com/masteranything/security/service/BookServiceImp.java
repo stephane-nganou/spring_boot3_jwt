@@ -53,7 +53,7 @@ public class BookServiceImp implements BookService {
 
         return bookRepository.findById(bookId)
                 .map(BookUtils::convertToBookResponse)
-                .orElseThrow(() -> new GeneralException("No Book found. Id: " + bookId, HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new GeneralException(BOOK_NOT_FOUND + bookId, HttpStatus.NOT_FOUND));
         
     }
 
