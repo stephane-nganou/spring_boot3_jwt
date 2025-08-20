@@ -210,6 +210,7 @@ class BookServiceImpTest {
                                                         .returned(false)
                                                         .returnApproved(false)
                                                         .build();
+
         Page<BookTransactionHistory> page = new PageImpl<>(List.of(transactionHistory));
         when(connectedUser.getPrincipal()).thenReturn(user);
         when(transactionHistoryRepository.findAllBorrowedBooks(any(Pageable.class), any(Long.class))).thenReturn(page);
@@ -228,6 +229,39 @@ class BookServiceImpTest {
         assertEquals(1L, response.totalElements());
         assertEquals(1L, response.totalPages());
     }
+
+    @Test
+    void whenFindAllReturnedBooksWithValidPageRequest_ThenReturnsPageResponse(){
+        
+        // prepare
+        BookTransactionHistory transactionHistory = BookTransactionHistory.builder()
+                                                        .book(book)
+                                                        .user(user)
+                                                        .returned(true)
+                                                        .returnApproved(true)
+                                                        .build();
+
+        Page<BookTransactionHistory> page = new PageImpl<>(List.of(transactionHistory));
+        when(connectedUser.getPrincipal()).thenReturn(user);
+        when(transactionHistoryRepository.findAllReturnedBooks(any(Pageable.class), any(Long.class))).thenReturn(page);
+
+        // test
+        PageResponse<BorrowedBookResponse> response = bookService.findAllReturnedBooks(0, 10, connectedUser);
+
+        // verify
+        assertNotNull(response);
+        verify(transactionHistoryRepository,
+            times(1)).findAllReturnedBooks(
+                any(Pageable.class),
+                any(Long.class)
+            );
+        assertEquals(1, response.content().size());
+        assertEquals(1L, response.totalElements());
+        assertEquals(1L, response.totalPages());
+        assertEquals(true, response.content().getFirst().returnApproval());
+        assertEquals(true, response.content().getFirst().returned());
+    }
+        
     
 
 }
