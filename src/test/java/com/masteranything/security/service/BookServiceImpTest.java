@@ -4,21 +4,25 @@
 
  package com.masteranything.security.service;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 
@@ -26,6 +30,7 @@ import com.masteranything.security.dao.Book;
 import com.masteranything.security.dao.User;
 import com.masteranything.security.dto.BookRequest;
 import com.masteranything.security.dto.BookResponse;
+import com.masteranything.security.dto.PageResponse;
 import com.masteranything.security.exception.GeneralException;
 import com.masteranything.security.repository.BookRepository;
 import com.masteranything.security.repository.BookTransactionHistoryRepository;
@@ -121,6 +126,33 @@ class BookServiceImpTest {
         assertEquals(HttpStatus.NOT_FOUND, bookNotFoundException.getStatus());
         verify(bookRepository).findById(bookId);
 
+    }
+
+    @Test
+    void whenFindAllBookWithValidPageRequest_ThenReturnValidPageResponse(){
+
+        // prepare
+        Page<Book> page = new PageImpl<>(List.of(book));
+        when(connectedUser.getPrincipal()).thenReturn(user);
+        when(bookRepository.findAllDisplayableBooks(any(Pageable.class), any(Long.class)))
+            .thenReturn(page);
+
+        // test
+        PageResponse<BookResponse> response = bookService.findAllBooks(0, 10, connectedUser);
+
+        // verify
+        assertNotNull(response);
+        assertEquals(0, response.number());
+        assertEquals(1, response.size());
+        assertEquals(1L, response.totalElements());
+        assertEquals(1L, response.totalPages());
+        assertEquals(true, response.first());
+        assertEquals(true, response.last());
+        assertEquals(true, response.last());
+        assertEquals(1, response.content().size());
+        assertEquals(book.getId(), response.content().getFirst().id());
+        verify(bookRepository, times(1))
+                .findAllDisplayableBooks(any(Pageable.class), any(Long.class));
     }
 
 }
