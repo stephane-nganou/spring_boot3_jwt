@@ -32,6 +32,7 @@ import com.masteranything.security.dao.BookTransactionHistory;
 import com.masteranything.security.dao.User;
 import com.masteranything.security.dto.BookRequest;
 import com.masteranything.security.dto.BookResponse;
+import com.masteranything.security.dto.BorrowedBookResponse;
 import com.masteranything.security.dto.PageResponse;
 import com.masteranything.security.exception.GeneralException;
 import com.masteranything.security.repository.BookRepository;
@@ -184,14 +185,7 @@ class BookServiceImpTest {
     void whenFindAllBooksByOwnerWithValidPageRequestAndNoOwnBook_ThenReturnEmptyValidPageResponse(){
 
         // prepare
-        BookTransactionHistory transactionHistory = BookTransactionHistory.builder()
-                                                        .book(book)
-                                                        .user(user)
-                                                        .returned(false)
-                                                        .returnApproved(false)
-                                                        .build();
-
-        Page<BookTransactionHistory> page = new PageImpl<>(List.of(transactionHistory));
+        Page<Book> page = new PageImpl<>(List.of());
         when(connectedUser.getPrincipal()).thenReturn(user);
         when(bookRepository.findAll(any(Specification.class), any(Pageable.class))).thenReturn(page);
 
@@ -207,6 +201,33 @@ class BookServiceImpTest {
         assertEquals(1L, response.totalPages());
     }
 
+    @Test
+    void WhenFindAllBorrowedBooksWithValidPageRequest_ThenReturnsPageResponse(){
+        // prepare
+        BookTransactionHistory transactionHistory = BookTransactionHistory.builder()
+                                                        .book(book)
+                                                        .user(user)
+                                                        .returned(false)
+                                                        .returnApproved(false)
+                                                        .build();
+        Page<BookTransactionHistory> page = new PageImpl<>(List.of(transactionHistory));
+        when(connectedUser.getPrincipal()).thenReturn(user);
+        when(transactionHistoryRepository.findAllBorrowedBooks(any(Pageable.class), any(Long.class))).thenReturn(page);
+
+        // test
+        PageResponse<BorrowedBookResponse> response = bookService.findAllBorrowedBooks(0, 10, connectedUser);
+
+        // verify
+        assertNotNull(response);
+        verify(transactionHistoryRepository,
+            times(1)).findAllBorrowedBooks(
+                any(Pageable.class),
+                any(Long.class)
+            );
+        assertEquals(1, response.content().size());
+        assertEquals(1L, response.totalElements());
+        assertEquals(1L, response.totalPages());
+    }
     
 
 }
