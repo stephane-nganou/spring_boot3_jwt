@@ -60,6 +60,12 @@ public class BookUtils {
             throw new GeneralException("Book unavailable", HttpStatus.NOT_ACCEPTABLE);
     }
 
+
+    public static void checkIfBookArchivedOrNotShareable(Book book){
+        if(book.isArchived() || book.isShareable())
+            throw new GeneralException("Book unavailable", HttpStatus.NOT_ACCEPTABLE);
+    }
+
     public static void checkIfBookArchived(Book book){
         if(book.isArchived())
             throw new GeneralException("Book unavailable", HttpStatus.NOT_ACCEPTABLE);

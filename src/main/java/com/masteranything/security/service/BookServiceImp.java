@@ -266,7 +266,7 @@ public class BookServiceImp implements BookService {
 
         var user = (User) connectedUser.getPrincipal();
 
-        BookUtils.checkIfBookArchivedOrShareable(book);
+        BookUtils.checkIfBookArchivedOrNotShareable(book);
 
         BookUtils.checkIfOwnerBook(book, user);
 
@@ -274,7 +274,7 @@ public class BookServiceImp implements BookService {
                                                             .findByBookIdAndOwnerId(bookId, user.getId())
                                                             .orElseThrow(() -> new GeneralException("No Transaction found", HttpStatus.NOT_FOUND));
 
-        bookTransactionHistory.setReturnApproved(false);
+        bookTransactionHistory.setReturnApproved(true);
 
         return transactionHistoryRepository.save(bookTransactionHistory).getId();
     }

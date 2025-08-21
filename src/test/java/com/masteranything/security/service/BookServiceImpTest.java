@@ -540,7 +540,69 @@ class BookServiceImpTest {
         verify(bookRepository).findById(any(Long.class));
         verify(transactionHistoryRepository).findByBookIdAndUserId(any(Long.class), any(Long.class));
     }
+
+    @Test
+    void whenApproveReturnBook_WithBorrowedBookAndOwnerBook_ThenTransactionId(){
         
+        // prepare
+        User user_2 = User.builder()
+                        .id(2L)
+                        .build();
+        Book borrowedBook = Book.builder()
+                            .id(1L)
+                            .owner(user)
+                            .shareable(false)
+                            .archived(false)
+                            .build();
+        BookTransactionHistory transactionHistory = BookTransactionHistory.builder()
+                                                        .id(1L)
+                                                        .book(borrowedBook)
+                                                        .user(user_2)
+                                                        .returned(true)
+                                                        .returnApproved(false)
+                                                        .build();
+        when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(borrowedBook));
+        when(connectedUser.getPrincipal()).thenReturn(user);
+        when(transactionHistoryRepository.findByBookIdAndOwnerId(
+            any(Long.class),
+            any(Long.class)
+            )
+        ).thenReturn(Optional.of(transactionHistory));
+        when(transactionHistoryRepository.save(any(BookTransactionHistory.class))).thenReturn(transactionHistory);
+
+        // test
+        Long successfullTransactionId = bookService.approveReturnBook(book.getId(), connectedUser);
+
+        
+        // verify
+        assertEquals(successfullTransactionId, transactionHistory.getId());
+        assertEquals(true, transactionHistory.isReturned());
+        assertEquals(true, transactionHistory.isReturned());
+        verify(bookRepository).findById(any(Long.class));
+        verify(transactionHistoryRepository).findByBookIdAndOwnerId(any(Long.class), any(Long.class));
+        verify(transactionHistoryRepository).save(any(BookTransactionHistory.class));
+    }
+
+    @Test
+    void whenApproveReturnBook_WithNoBorrowedBookAndNotOwnBook_ThenThrowsGeneralException(){
+        
+        // prepare
+        User user_2 = User.builder()
+                        .id(2L)
+                        .build();
     
+        when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(book));
+        when(connectedUser.getPrincipal()).thenReturn(user_2);
+
+        // test
+        GeneralException bookNotFoundException = assertThrows(GeneralException.class,
+                    () -> bookService.approveReturnBook(book.getId(), connectedUser));
+
+        
+        // verify
+        assertEquals("Book unavailable", bookNotFoundException.getMessage());
+        assertEquals(HttpStatus.NOT_ACCEPTABLE, bookNotFoundException.getStatus());
+        verify(bookRepository).findById(any(Long.class));
+    }
 
 }
