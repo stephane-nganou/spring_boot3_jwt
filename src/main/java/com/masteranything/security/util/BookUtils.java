@@ -60,6 +60,11 @@ public class BookUtils {
             throw new GeneralException("Book unavailable", HttpStatus.NOT_ACCEPTABLE);
     }
 
+    public static void checkIfBookArchived(Book book){
+        if(book.isArchived())
+            throw new GeneralException("Book unavailable", HttpStatus.NOT_ACCEPTABLE);
+    }
+
     public static void checkIfNotOwnerBook(Book book, User user){
         if(Objects.equals(book.getOwner().getId(), user.getId()))
             throw new GeneralException("Can not update own book", HttpStatus.NOT_ACCEPTABLE);

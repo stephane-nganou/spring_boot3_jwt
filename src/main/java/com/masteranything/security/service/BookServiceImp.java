@@ -242,8 +242,7 @@ public class BookServiceImp implements BookService {
 
         var user = (User) connectedUser.getPrincipal();
 
-        BookUtils.checkIfBookArchivedOrShareable(book);
-
+        BookUtils.checkIfBookArchived(book);
         BookUtils.checkIfNotOwnerBook(book, user);
 
         BookTransactionHistory bookTransactionHistory = transactionHistoryRepository
