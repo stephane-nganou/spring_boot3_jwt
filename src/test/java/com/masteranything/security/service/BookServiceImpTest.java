@@ -65,7 +65,6 @@ class BookServiceImpTest {
     private BookRequest bookRequest;
 
     @BeforeEach
-    @SuppressWarnings("It is used")
     void setUp() {
         user = new User();
         user.setId(1L);
