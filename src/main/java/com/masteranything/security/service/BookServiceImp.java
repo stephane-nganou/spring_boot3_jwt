@@ -213,7 +213,7 @@ public class BookServiceImp implements BookService {
 
         BookUtils.checkIfNotOwnerBook(book, user);
 
-        BookUtils.checkIfAlreadyBorrowed(book, user);  
+        //BookUtils.checkIfAlreadyBorrowed(book, user);  
         
         if(transactionHistoryRepository.isAlreadyBorrowedByUser(bookId))
             throw new GeneralException("Book already Borrowed", HttpStatus.NOT_ACCEPTABLE);

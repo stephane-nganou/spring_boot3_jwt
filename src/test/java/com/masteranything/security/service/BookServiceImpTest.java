@@ -370,6 +370,102 @@ class BookServiceImpTest {
         verify(bookRepository).findById(any(Long.class));
 
     }
+
+    @Test
+    void whenBorrowBook_WithValidBookAndNotOwnBook_ThenReturnsTransactionId(){
+        
+        // prepare
+        User user_2 = User.builder()
+                        .id(2L)
+                        .build();
+        BookTransactionHistory transactionHistory = BookTransactionHistory.builder()
+                                                        .id(1L)
+                                                        .book(book)
+                                                        .user(user_2)
+                                                        .returned(false)
+                                                        .returnApproved(false)
+                                                        .build();
+        when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(book));
+        when(connectedUser.getPrincipal()).thenReturn(user_2);
+        when(transactionHistoryRepository.isAlreadyBorrowedByUser(any(Long.class))).thenReturn(false);
+        when(transactionHistoryRepository.save(any(BookTransactionHistory.class))).thenReturn(transactionHistory);
+
+        // test
+        Long transactionId = bookService.borrowBook(book.getId(), connectedUser);
+
+        // verify
+        assertEquals(transactionId, transactionHistory.getId());
+        verify(transactionHistoryRepository).save(any(BookTransactionHistory.class));
+    }
+
+    @Test
+    void whenBorrowBook_WithValidBookAndOwnBook_ThenThrowsGeneralException(){
+        
+        // prepare
+        when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(book));
+        when(connectedUser.getPrincipal()).thenReturn(user);
+
+        // test
+        GeneralException bookNotFoundException = assertThrows(GeneralException.class,
+                    () -> bookService.borrowBook(book.getId(), connectedUser));
+
+        
+        // verify
+        assertEquals("Can not update own book", bookNotFoundException.getMessage());
+        assertEquals(HttpStatus.NOT_ACCEPTABLE, bookNotFoundException.getStatus());
+        verify(bookRepository).findById(any(Long.class));
+    }
+
+    @Test
+    void whenBorrowBook_WithArchivedBookAndNotOwnBook_ThenThrowsGeneralException(){
+        
+        // prepare
+        Book archivedBook = Book.builder()
+                            .id(1L)
+                            .owner(user)
+                            .shareable(true)
+                            .archived(true)
+                            .build();
+        when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(archivedBook));
+        when(connectedUser.getPrincipal()).thenReturn(user);
+
+        // test
+        GeneralException bookNotFoundException = assertThrows(GeneralException.class,
+                    () -> bookService.borrowBook(book.getId(), connectedUser));
+
+        
+        // verify
+        assertEquals("Book unavailable", bookNotFoundException.getMessage());
+        assertEquals(HttpStatus.NOT_ACCEPTABLE, bookNotFoundException.getStatus());
+        verify(bookRepository).findById(any(Long.class));
+    }
+
+    @Test
+    void whenBorrowBook_WithAlreadyBorrowedBookAndNotOwnBook_ThenThrowsGeneralException(){
+        
+        // prepare
+        User user_2 = User.builder()
+                        .id(2L)
+                        .build();
+        Book archivedBook = Book.builder()
+                            .id(1L)
+                            .owner(user_2)
+                            .shareable(false)
+                            .archived(false)
+                            .build();
+        when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(archivedBook));
+        when(connectedUser.getPrincipal()).thenReturn(user);
+
+        // test
+        GeneralException bookNotFoundException = assertThrows(GeneralException.class,
+                    () -> bookService.borrowBook(book.getId(), connectedUser));
+
+        
+        // verify
+        assertEquals("Book unavailable", bookNotFoundException.getMessage());
+        assertEquals(HttpStatus.NOT_ACCEPTABLE, bookNotFoundException.getStatus());
+        verify(bookRepository).findById(any(Long.class));
+    }
         
     
 

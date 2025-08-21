@@ -70,6 +70,7 @@ public class BookUtils {
             throw new GeneralException("Can not update this book", HttpStatus.FORBIDDEN);
     }
 
+    
     public static void checkIfAlreadyBorrowed(Book book, User user){
         if(Objects.equals(book.getOwner().getId(), user.getId()))
             throw new GeneralException("Can not borrowed book", HttpStatus.NOT_ACCEPTABLE);
