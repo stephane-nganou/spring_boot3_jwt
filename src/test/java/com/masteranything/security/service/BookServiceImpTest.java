@@ -316,6 +316,60 @@ class BookServiceImpTest {
         verify(bookRepository).findById(any(Long.class));
 
     }
+
+    @Test
+    void whenUpdateArchivedStatusStatusWithExistingBookAndOwner_ThenReturnBookId(){
+        
+        // prepare
+        boolean oldArchivedStatus = book.isArchived();
+        when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(book));
+        when(connectedUser.getPrincipal()).thenReturn(user);
+
+        // test
+        Long updatedBookId = bookService.updateArchivedStatus(book.getId(), connectedUser);
+
+        // verify
+        verify(bookRepository, times(1)).save(any(Book.class));
+        assertEquals(book.getId(), updatedBookId);
+        assertEquals(!oldArchivedStatus, book.isArchived());
+    }
+
+    @Test
+    void whenUpdateArchivedStatusWithExistingBookAndNotOwner_ThenThrowsGeneralException(){
+        // prepare
+        User user_2 = User.builder()
+                        .id(2L)
+                        .build();
+        when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(book));
+        when(connectedUser.getPrincipal()).thenReturn(user_2);
+
+        // test
+        GeneralException updateBookStatusNotPermit = assertThrows(GeneralException.class,
+                    () -> bookService.updateArchivedStatus(book.getId(), connectedUser));
+
+
+        // verify
+        assertEquals("Operation Not Permitted", updateBookStatusNotPermit.getMessage());
+        assertEquals(HttpStatus.FORBIDDEN, updateBookStatusNotPermit.getStatus());
+        verify(bookRepository).findById(any(Long.class));
+    }
+
+    @Test
+    void whenUpdateArchivedStatusWithNonExistingBook_ThenThrowsGeneralException(){
+        
+        // prepare
+        when(bookRepository.findById(any(Long.class))).thenReturn(Optional.empty());
+        
+        // test
+        GeneralException bookNotFoundException = assertThrows(GeneralException.class,
+                    () -> bookService.updateArchivedStatus(book.getId(), connectedUser));
+
+        // verify
+        assertEquals("No Book found with ID: " + book.getId(), bookNotFoundException.getMessage());
+        assertEquals(HttpStatus.NOT_FOUND, bookNotFoundException.getStatus());
+        verify(bookRepository).findById(any(Long.class));
+
+    }
         
     
 
