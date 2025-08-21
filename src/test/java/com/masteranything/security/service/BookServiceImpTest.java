@@ -25,6 +25,7 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.core.Authentication;
 
 import com.masteranything.security.dao.Book;
@@ -603,6 +604,26 @@ class BookServiceImpTest {
         assertEquals("Book unavailable", bookNotFoundException.getMessage());
         assertEquals(HttpStatus.NOT_ACCEPTABLE, bookNotFoundException.getStatus());
         verify(bookRepository).findById(any(Long.class));
+    }
+
+    @Test
+    void whenUploadBookCoverPicture_WithValidBookAndOwner_SavesCover(){
+
+        // prepare
+        var coverFilePath = "cover.jpg";
+        MockMultipartFile file = new MockMultipartFile("file", "test.jpg", "image/jpeg", new byte[10]);
+        when(bookRepository.findById(any(Long.class))).thenReturn(Optional.of(book));
+        when(connectedUser.getPrincipal()).thenReturn(user);
+        when(fileStorageService.saveFile(file, book.getId())).thenReturn(coverFilePath);
+        when(bookRepository.save(any(Book.class))).thenReturn(book);
+
+        // test
+        bookService.uploadBookCoverPicture(file, book.getId(), connectedUser);
+
+        // verify
+        assertEquals(coverFilePath, book.getBookCover());
+        verify(fileStorageService).saveFile(file, 1L);
+        verify(bookRepository).save(book);
     }
 
 }
