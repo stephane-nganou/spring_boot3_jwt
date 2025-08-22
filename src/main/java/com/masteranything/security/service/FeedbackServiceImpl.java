@@ -41,7 +41,6 @@ public class FeedbackServiceImpl implements FeedbackService {
                 BOOK_NOT_FOUND + request.bookId(),
                 HttpStatus.NOT_FOUND
             ));
-        BookUtils.checkIfBookArchivedOrShareable(book);
 
         var user = (User) connectedUser.getPrincipal();
         BookUtils.checkIfNotOwnerBook(book, user);
