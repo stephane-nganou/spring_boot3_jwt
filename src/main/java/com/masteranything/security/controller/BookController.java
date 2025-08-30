@@ -136,6 +136,19 @@ public class BookController {
             .body(bookService.updateShareableStatus(bookId, connectedUser));
     }
 
+    @PatchMapping("/archive/{book-id}")
+    @Operation(summary="updateArchivedStatus", description="Update the archive status of a targeted book")
+    @ApiResponses({
+        @ApiResponse(responseCode="200", description="Book updated successfully"),
+        @ApiResponse(responseCode="403", description="Operation not permitted because not book owner"),
+        @ApiResponse(responseCode="404", description="Book not found")
+    })
+    public ResponseEntity<Long> updateArchivedStatus(@PathVariable Long bookId, Authentication connectedUser){
+        
+        return ResponseEntity.status(HttpStatus.OK)
+            .body(bookService.updateArchivedStatus(bookId, connectedUser));
+    }
+
     @PostMapping("/borrow/{book-id}")
     @Operation(summary="borrowBook", description="borrow a desired book")
     @ApiResponses({
