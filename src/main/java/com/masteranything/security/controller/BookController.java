@@ -30,180 +30,178 @@ import lombok.RequiredArgsConstructor;
 @RestController
 @RequestMapping("/api/v1/books")
 @RequiredArgsConstructor
-@Tag(name="Book", description="Handles everything related to book component")
+@Tag(name = "Book", description = "Handles everything related to book component")
 public class BookController {
 
     private final BookService bookService;
 
     @GetMapping("/")
     // Endpoint tested
-    @Operation(summary="getAllBooks", description="Returns a list of all available books")
+    @Operation(summary = "getAllBooks", description = "Returns a list of all available books")
     @ApiResponses({
-        @ApiResponse(responseCode="200", description="List return successfully")
+        @ApiResponse(responseCode = "200", description = "List return successfully")
     })
     public ResponseEntity<PageResponse<BookResponse>> getAllBooks(
-        @RequestParam(name = "page", defaultValue="0", required=false) int page,
-        @RequestParam(name = "size", defaultValue="10", required=false) int size,
-        Authentication connectedUser
-    ){
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size,
+            Authentication connectedUser
+    ) {
         // return new ResponseEntity<>(bookService.findAllBooks(page, size, connectedUser), HttpStatus.OK);
         return ResponseEntity.status(HttpStatus.OK)
-            .body(bookService.findAllBooks(page, size, connectedUser));
+                .body(bookService.findAllBooks(page, size, connectedUser));
     }
 
     @PostMapping("/")
     // Endpoint tested
-    @Operation(summary="saveBook", description="Submit data to save a new book")
+    @Operation(summary = "saveBook", description = "Submit data to save a new book")
     @ApiResponses({
-        @ApiResponse(responseCode="201", description="Book register successfully")
+        @ApiResponse(responseCode = "201", description = "Book register successfully")
     })
     public ResponseEntity<Long> saveBook(
-        @Valid @RequestBody BookRequest request, Authentication connectedUser
-    ){
-        //return new ResponseEntity<>(bookService.save(request, connectedUser), HttpStatus.CREATED);
-        return ResponseEntity.status(HttpStatus.CREATED)
-            .body(bookService.save(request, connectedUser));
+            @Valid @RequestBody BookRequest request, Authentication connectedUser
+    ) {
+        
+        return new ResponseEntity<>(bookService.save(request, connectedUser), HttpStatus.CREATED);
     }
 
     @GetMapping("/{book-id}")
     // Endpoint tested
-    @Operation(summary="findBookById", description="Search for a book by Id")
+    @Operation(summary = "findBookById", description = "Search for a book by Id")
     @ApiResponses({
-        @ApiResponse(responseCode="200", description="Book found"),
-        @ApiResponse(responseCode="404", description="Book not found")
+        @ApiResponse(responseCode = "200", description = "Book found"),
+        @ApiResponse(responseCode = "404", description = "Book not found")
     })
-    public ResponseEntity<BookResponse> findBookById(@PathVariable("book-id") Long bookId ){
+    public ResponseEntity<BookResponse> findBookById(@PathVariable("book-id") Long bookId) {
         // return new ResponseEntity<>(bookService.findById(bookId), HttpStatus.OK);
         return ResponseEntity.status(HttpStatus.OK)
-            .body(bookService.findById(bookId));
+                .body(bookService.findById(bookId));
     }
 
     @GetMapping("/owner")
     // Endpoint tested
-    @Operation(summary="getAllBooksByOwner", description="Get all books belonging to the authenticated user")
+    @Operation(summary = "getAllBooksByOwner", description = "Get all books belonging to the authenticated user")
     @ApiResponses({
-        @ApiResponse(responseCode="200", description="List of books")
+        @ApiResponse(responseCode = "200", description = "List of books")
     })
     public ResponseEntity<PageResponse<BookResponse>> getAllBooksByOwner(
-        @RequestParam(name = "page", defaultValue="0", required=false) int page,
-        @RequestParam(name = "size", defaultValue="10", required=false) int size,
-        Authentication connectedUser
-    ){
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size,
+            Authentication connectedUser
+    ) {
         //return new ResponseEntity<>(bookService.findAllBooksByOwner(page, size, connectedUser), HttpStatus.OK);
 
         return ResponseEntity.status(HttpStatus.OK)
-            .body(bookService.findAllBooksByOwner(page, size, connectedUser));
+                .body(bookService.findAllBooksByOwner(page, size, connectedUser));
     }
 
     @GetMapping("/borrowed")
-    @Operation(summary="getAllBorrowedBooks", description="Get all books borrowed by the authenticated user")
+    @Operation(summary = "getAllBorrowedBooks", description = "Get all books borrowed by the authenticated user")
     @ApiResponses({
-        @ApiResponse(responseCode="200", description="List of books")
+        @ApiResponse(responseCode = "200", description = "List of books")
     })
     public ResponseEntity<PageResponse<BorrowedBookResponse>> getAllBorrowedBooks(
-        @RequestParam(name = "page", defaultValue="0", required=false) int page,
-        @RequestParam(name = "size", defaultValue="10", required=false) int size,
-        Authentication connectedUser
-    ){
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size,
+            Authentication connectedUser
+    ) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(bookService.findAllBorrowedBooks(page, size, connectedUser));
+                .body(bookService.findAllBorrowedBooks(page, size, connectedUser));
     }
 
     @GetMapping("/returned")
-    @Operation(summary="getAllReturnedBooks", description="Get all books returned by the authenticated user")
+    @Operation(summary = "getAllReturnedBooks", description = "Get all books returned by the authenticated user")
     @ApiResponses({
-        @ApiResponse(responseCode="200", description="List of books")
+        @ApiResponse(responseCode = "200", description = "List of books")
     })
     public ResponseEntity<PageResponse<BorrowedBookResponse>> getAllReturnedBooks(
-        @RequestParam(name = "page", defaultValue="0", required=false) int page,
-        @RequestParam(name = "size", defaultValue="10", required=false) int size,
-        Authentication connectedUser
-    ){
+            @RequestParam(name = "page", defaultValue = "0", required = false) int page,
+            @RequestParam(name = "size", defaultValue = "10", required = false) int size,
+            Authentication connectedUser
+    ) {
         return ResponseEntity.status(HttpStatus.OK)
-            .body(bookService.findAllReturnedBooks(page, size, connectedUser));
+                .body(bookService.findAllReturnedBooks(page, size, connectedUser));
     }
 
     @PatchMapping("/shareable/{book-id}")
-    @Operation(summary="updateShareableStatus", description="Update the shareable status of a targeted book")
+    @Operation(summary = "updateShareableStatus", description = "Update the shareable status of a targeted book")
     @ApiResponses({
-        @ApiResponse(responseCode="200", description="Book updated successfully"),
-        @ApiResponse(responseCode="403", description="Operation not permitted because not book owner"),
-        @ApiResponse(responseCode="404", description="Book not found")
+        @ApiResponse(responseCode = "200", description = "Book updated successfully"),
+        @ApiResponse(responseCode = "403", description = "Operation not permitted because not book owner"),
+        @ApiResponse(responseCode = "404", description = "Book not found")
     })
-    public ResponseEntity<Long> updateShareableStatus(@PathVariable Long bookId, Authentication connectedUser){
-        
+    public ResponseEntity<Long> updateShareableStatus(@PathVariable Long bookId, Authentication connectedUser) {
+
         return ResponseEntity.status(HttpStatus.OK)
-            .body(bookService.updateShareableStatus(bookId, connectedUser));
+                .body(bookService.updateShareableStatus(bookId, connectedUser));
     }
 
     @PatchMapping("/archive/{book-id}")
-    @Operation(summary="updateArchivedStatus", description="Update the archive status of a targeted book")
+    @Operation(summary = "updateArchivedStatus", description = "Update the archive status of a targeted book")
     @ApiResponses({
-        @ApiResponse(responseCode="200", description="Book updated successfully"),
-        @ApiResponse(responseCode="403", description="Operation not permitted because not book owner"),
-        @ApiResponse(responseCode="404", description="Book not found")
+        @ApiResponse(responseCode = "200", description = "Book updated successfully"),
+        @ApiResponse(responseCode = "403", description = "Operation not permitted because not book owner"),
+        @ApiResponse(responseCode = "404", description = "Book not found")
     })
-    public ResponseEntity<Long> updateArchivedStatus(@PathVariable Long bookId, Authentication connectedUser){
-        
+    public ResponseEntity<Long> updateArchivedStatus(@PathVariable Long bookId, Authentication connectedUser) {
+
         return ResponseEntity.status(HttpStatus.OK)
-            .body(bookService.updateArchivedStatus(bookId, connectedUser));
+                .body(bookService.updateArchivedStatus(bookId, connectedUser));
     }
 
     @PostMapping("/borrow/{book-id}")
-    @Operation(summary="borrowBook", description="borrow a desired book")
+    @Operation(summary = "borrowBook", description = "borrow a desired book")
     @ApiResponses({
-        @ApiResponse(responseCode="200", description="Book borrowed successfully"),
-        @ApiResponse(responseCode="403", description="Operation not permitted because book owner"),
-        @ApiResponse(responseCode="404", description="Book not found"),
-        @ApiResponse(responseCode="406", description="Book can not be borrowed")
+        @ApiResponse(responseCode = "200", description = "Book borrowed successfully"),
+        @ApiResponse(responseCode = "403", description = "Operation not permitted because book owner"),
+        @ApiResponse(responseCode = "404", description = "Book not found"),
+        @ApiResponse(responseCode = "406", description = "Book can not be borrowed")
     })
-    public ResponseEntity<Long> borrowBook(@PathVariable Long bookId, Authentication connectedUser){
-        
+    public ResponseEntity<Long> borrowBook(@PathVariable Long bookId, Authentication connectedUser) {
+
         return ResponseEntity.status(HttpStatus.OK)
-            .body(bookService.borrowBook(bookId, connectedUser));
+                .body(bookService.borrowBook(bookId, connectedUser));
     }
 
     @PatchMapping("/borrow/return/{book-id}")
-    @Operation(summary="returnBorrowBook", description="Return a borrowed book")
+    @Operation(summary = "returnBorrowBook", description = "Return a borrowed book")
     @ApiResponses({
-        @ApiResponse(responseCode="200", description="Return operation successfully"),
-        @ApiResponse(responseCode="404", description="Book not found"),
-        @ApiResponse(responseCode="406", description="Book can not be returned")
+        @ApiResponse(responseCode = "200", description = "Return operation successfully"),
+        @ApiResponse(responseCode = "404", description = "Book not found"),
+        @ApiResponse(responseCode = "406", description = "Book can not be returned")
     })
-    public ResponseEntity<Long> returnBorrowBook(@PathVariable Long bookId, Authentication connectedUser){
-        
+    public ResponseEntity<Long> returnBorrowBook(@PathVariable Long bookId, Authentication connectedUser) {
+
         return ResponseEntity.status(HttpStatus.OK)
-            .body(bookService.returnBorrowBook(bookId, connectedUser));
+                .body(bookService.returnBorrowBook(bookId, connectedUser));
     }
 
     @PatchMapping("/borrow/return/approve/{book-id}")
-    @Operation(summary="approveReturnBorrowBook", description="Approve the Return of a borrowed book")
+    @Operation(summary = "approveReturnBorrowBook", description = "Approve the Return of a borrowed book")
     @ApiResponses({
-        @ApiResponse(responseCode="200", description="Approve successfully"),
-        @ApiResponse(responseCode="403", description="Operation not permitted because not book owner"),
-        @ApiResponse(responseCode="404", description="Book not found"),
-        @ApiResponse(responseCode="406", description="Return can not be approved")
+        @ApiResponse(responseCode = "200", description = "Approve successfully"),
+        @ApiResponse(responseCode = "403", description = "Operation not permitted because not book owner"),
+        @ApiResponse(responseCode = "404", description = "Book not found"),
+        @ApiResponse(responseCode = "406", description = "Return can not be approved")
     })
-    public ResponseEntity<Long> approveReturnBorrowBook(@PathVariable Long bookId, Authentication connectedUser){
-        
+    public ResponseEntity<Long> approveReturnBorrowBook(@PathVariable Long bookId, Authentication connectedUser) {
+
         return ResponseEntity.status(HttpStatus.OK)
-            .body(bookService.approveReturnBook(bookId, connectedUser));
+                .body(bookService.approveReturnBook(bookId, connectedUser));
     }
 
-    @PostMapping(value="/cover/{book-id}", consumes="multipart/form-data")
-    @Operation(summary="uploadBookCoverPicture", description="Update book cover")
+    @PostMapping(value = "/cover/{book-id}", consumes = "multipart/form-data")
+    @Operation(summary = "uploadBookCoverPicture", description = "Update book cover")
     @ApiResponses({
-        @ApiResponse(responseCode="200", description="Update successfully"),
-        @ApiResponse(responseCode="403", description="Operation not permitted because not book owner"),
-        @ApiResponse(responseCode="404", description="Book not found")
+        @ApiResponse(responseCode = "200", description = "Update successfully"),
+        @ApiResponse(responseCode = "403", description = "Operation not permitted because not book owner"),
+        @ApiResponse(responseCode = "404", description = "Book not found")
     })
     public ResponseEntity<?> uploadBookCoverPicture(@PathVariable Long bookId,
-        @RequestPart("file") MultipartFile file, Authentication connectedUser){
-        
+            @RequestPart("file") MultipartFile file, Authentication connectedUser) {
+
         bookService.uploadBookCoverPicture(file, bookId, connectedUser);
-        
+
         return ResponseEntity.ok().build();
     }
-
 
 }

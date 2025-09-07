@@ -23,6 +23,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 public class Book extends BaseEntityAuditAware {
 
+    // unique=true: will be enable at some point
     @Column(nullable = false)
     private String title;
 
