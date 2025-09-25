@@ -9,6 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -21,7 +22,6 @@ import com.masteranything.security.dto.ErrorDetails;
 import com.masteranything.security.service.security.JwtService;
 
 import io.jsonwebtoken.MalformedJwtException;
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -49,9 +49,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private String authBearer;
 
   @Override
-  protected void doFilterInternal(@Nonnull HttpServletRequest request,
-      @Nonnull HttpServletResponse response,
-      @Nonnull FilterChain filterChain) throws ServletException, IOException {
+  protected void doFilterInternal(@NonNull HttpServletRequest request,
+      @NonNull HttpServletResponse response,
+      @NonNull FilterChain filterChain) throws ServletException, IOException {
 
     try{
       if(request.getServletPath().contains("/api/v1/auth")){
